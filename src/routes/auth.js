@@ -5,28 +5,73 @@ const { User } = require('./../db/models')
 const { compareSync } = require('bcrypt')
 
 
-
 router.post('/login', async (req, res) => {
 
-  // get user input
+  // get user input from login form
   const { email, password } = req.body
 
-  // get user from database
-  const user = await User.findOne({ email })
+  // get tokenstored on client
+  const token = req.headers.token || req.cookies.token
 
-  // check user input against db
-  if (user && compareSync(password, user.password)) {
+  // user is attempting to login with email and password
+  if (email && password) {
 
-    // json web token to hold session on client
-    const token = jwt.sign({ uid: user.id }, 'secret')
+    // get user from database
+    let user = await User.findOne({ email }).lean()
 
-    // return token to client
-    return res.send({ token })
+    // check user input against db
+    if (user && compareSync(password, user.password)) {
 
-  } else {
+      // add id field, remove _id and password
+      user.id = user._id
+      delete user._id
+      delete user.password
+      delete user['__v']
 
-    // return error, email/pw combination not found
-    return res.send(404)
+      // json web token to hold session on client
+      const token = jwt.sign({ uid: user.id }, 'secret', { expiresIn: '14 days'})
+
+      // return token to client
+      return res.send({ token, user })
+
+    } else {
+
+      // return error, email/pw combination not found
+      return res.sendStatus(404)
+
+    }
+
+  // user is attempting to login with a token
+  } else if (token) {
+
+    try {
+
+      // decode token
+      const decodedToken = jwt.verify(token, 'secret')
+
+      // fetch user from db
+      const user = await User.findOne({ _id: decodedToken.uid }).lean()
+
+      // no user found with id
+      if (!user) return res.sendStatus(404)
+
+      // add id field, remove _id and password
+      user.id = user._id
+      delete user._id
+      delete user.password
+      delete user['__v']
+
+      // give client a new refreshed token
+      const refreshedToken = jwt.sign({ uid: user.id }, 'secret', { expiresIn: '14 days'})
+
+      return res.send({ token: refreshedToken, user })
+
+    } catch(error) {
+
+      // token was invalid
+      return res.status(404).send(error)
+
+    }
 
   }
 
