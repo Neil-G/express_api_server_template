@@ -8,6 +8,7 @@ module.exports =  {
     firstName: String,
     lastName: String,
     email: String,
+    password: String,
     encryptedPassword: String,
   }
 }

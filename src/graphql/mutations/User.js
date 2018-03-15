@@ -1,7 +1,7 @@
 const { GraphQLString } = require ('graphql')
 const { UserType } = require('./../types')
 const { User } = require('./../../db/models')
-
+const { hashSync } = require('bcrypt')
 
 // CREATE
 exports.createUser = {
@@ -26,6 +26,9 @@ exports.createUser = {
     },
   },
   resolve: async (root, newUserArgs) => {
+
+    // encrypt password
+    newUserArgs.password = hashSync(newUserArgs.password, 10)
 
     let newUser = await new User(newUserArgs)
         .save()
