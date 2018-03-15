@@ -8,6 +8,17 @@ const graphqlHTTP = require('express-graphql')
 const GraphQLSchema = require('./src/graphql')
 
 
+// static folder
+app.use(express.static('public'))
+
+
+// format request info
+app.set('json spaces', 2)
+app.use(bodyParser.json());
+app.use(bodyParser.urlencoded({ extended: false }));
+app.use(cookieParser());
+
+
 // auth routes
 app.use('/auth', authRoutes)
 
