@@ -6,7 +6,8 @@ module.exports = new GraphQLObjectType({
   fields:  () => {
     return {
       id: {
-        type: GraphQLID
+        type: GraphQLID,
+        resolve: source => source._id
       },
       firstName: {
         type: GraphQLString

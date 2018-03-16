@@ -19,5 +19,8 @@
     "jsonwebtoken": "^8.2.0",
     "mongoose": "^5.0.10",
     "nodemon": "^1.17.2"
+  },
+  "devDependencies": {
+    "newman": "^3.9.3"
   }
 }

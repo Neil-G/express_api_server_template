@@ -1,13 +1,26 @@
-const { GraphQLString } = require ('graphql')
+const { GraphQLString, GraphQLNonNull } = require ('graphql')
 const { UserType } = require('./../types')
 const { User } = require('./../../db/models')
 const { hashSync } = require('bcrypt')
+const jwt = require('jsonwebtoken')
 
-// CREATE
-exports.createUser = {
+
+/********************************
+            UPDATE
+  (including delete as archive)
+********************************/
+exports.updateUser = {
   type: UserType,
   description: 'Create a User',
   args: {
+    id: {
+      description: 'unique id (required)',
+      type: GraphQLNonNull(GraphQLString)
+    },
+    userName: {
+      description: 'first name',
+      type: GraphQLString
+    },
     firstName: {
       description: 'first name',
       type: GraphQLString
@@ -20,20 +33,24 @@ exports.createUser = {
       description: 'email',
       type: GraphQLString
     },
-    password: {
-      description: 'password',
+    archived: {
+      description: 'email',
       type: GraphQLString
     },
   },
-  resolve: async (root, newUserArgs) => {
+  resolve: async (root, updates) => {
 
-    // encrypt password
-    newUserArgs.password = hashSync(newUserArgs.password, 10)
+    const uid = updates.id
+    delete updates.id
 
-    let newUser = await new User(newUserArgs)
-        .save()
-        .then(res => res)
+    return await User.findOne({ '_id': uid })
+      .then(user => {
 
-    return newUser
+        Object.keys(updates).forEach(key => {
+          user[key] = updates[key]
+        })
+
+        return user.save()
+      })
   }
 }
