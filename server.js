@@ -4,9 +4,9 @@ var exphbs  = require('express-handlebars');
 const bodyParser = require('body-parser')
 const cookieParser = require('cookie-parser')
 const config = require('./config')
-const authRoutes = require('./src/routes/auth')
+const authRoutes = require('./server/routes/auth')
 const graphqlHTTP = require('express-graphql')
-const GraphQLSchema = require('./src/graphql')
+const GraphQLSchema = require('./server/graphql')
 
 
 // static folder
@@ -26,6 +26,11 @@ app.use(cookieParser());
 app.get('/', function (req, res) {
   res.render('home');
 });
+
+// React application
+app.get('/app', (req, res) => {
+  res.send('app will be served here')
+})
 
 // auth routes
 app.use('/auth', authRoutes)
