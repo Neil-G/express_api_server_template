@@ -18,3 +18,12 @@ body {
     left: 0;
     right: 0;
 }
+
+.auth-form {
+    border: 1px solid lightgray;
+    border-radius: 4px;
+    display: flex;
+    flex-direction: column;
+    padding: 20px;
+    width: 600px;
+}
