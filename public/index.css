@@ -4,3 +4,17 @@ body {
     color: #333;
     font-family: 'Comfortaa', cursive;
 }
+
+#main {
+    padding: 72px 12px;
+}
+
+.top-nav {
+    background: whitesmoke;
+    display: flex;
+    height: 60px;
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+}
