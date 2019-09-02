@@ -1,9 +1,7 @@
 const { GraphQLString, GraphQLNonNull } = require ('graphql')
 const { UserType } = require('./../types')
 const { User } = require('./../../db/models')
-const { hashSync } = require('bcrypt')
-const jwt = require('jsonwebtoken')
-
+const { ObjectId } = require('mongoose').Types
 
 /********************************
             UPDATE
@@ -11,14 +9,14 @@ const jwt = require('jsonwebtoken')
 ********************************/
 exports.updateUser = {
   type: UserType,
-  description: 'Create a User',
+  description: 'update a User',
   args: {
-    id: {
+    userId: {
       description: 'unique id (required)',
       type: GraphQLNonNull(GraphQLString)
     },
     userName: {
-      description: 'first name',
+      description: 'username',
       type: GraphQLString
     },
     firstName: {
@@ -29,8 +27,8 @@ exports.updateUser = {
       description: 'last name',
       type: GraphQLString
     },
-    email: {
-      description: 'email',
+    emailAddress: {
+      description: 'email address',
       type: GraphQLString
     },
     archived: {
@@ -40,17 +38,13 @@ exports.updateUser = {
   },
   resolve: async (root, updates) => {
 
-    const uid = updates.id
+    const uid = updates.userId
     delete updates.id
 
-    return await User.findOne({ '_id': uid })
-      .then(user => {
-
-        Object.keys(updates).forEach(key => {
-          user[key] = updates[key]
-        })
-
-        return user.save()
-      })
+    return await User.findOneAndUpdate(
+      { _id: ObjectId(uid) },
+      { $set: updates },
+      { new: true }
+    )
   }
 }
