@@ -80,14 +80,14 @@ router.post('/login-with-token', async (req, res) => {
 router.post('/login-with-email-and-password', async (req, res) => {
 
   // get user input from login form
-  const { email, password } = req.body
+  const { emailAddress, password } = req.body
 
-  if (!email || !password) {
+  if (!emailAddress || !password) {
     return res.send({ message: 'must provide email and password' })
   }
 
   // get user from database
-  const user = await User.findOne({ email }).lean()
+  const user = await User.findOne({ emailAddress }).lean()
 
   // check user input against db
   if (!!user && compareSync(password, user.password)) {
