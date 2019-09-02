@@ -1,3 +1,47 @@
-<h2>Login</h2>
-<input type="email" placeholder="email">
-<input type="password" placeholder="verify password">
+<form id="loginForm" class="auth-form">
+    <h2>Login</h2>
+    <label>Email</label>
+    <input id="loginEmailInput" type="email" placeholder="email">
+    <label>Password</label>
+    <input id="loginPasswordInput" type="password" placeholder="verify password">
+    <button type="submit">Submit</button>
+</form>
+
+<script>
+    // attach onsubmit to form
+    var loginForm = document.getElementById("loginForm")
+    loginForm.addEventListener('submit', submitLoginForm)
+
+    function submitLoginForm (e) {
+        e.preventDefault()
+        var email = document.getElementById("loginEmailInput").value
+        var password = document.getElementById("loginPasswordInput").value
+
+        // validation
+
+        // submit data to server
+        axios({
+            method: 'post',
+            url: '/api/auth/login-with-email-and-password',
+            data: {
+                email: email,
+                password: password
+            }
+        // handle server response
+        }).then(res => {
+            // TODO: handle incorrect credentials error
+            if (res.data.type === 'incorrectCredentials')
+                return alert(res.data.message)
+
+            if (res.data.token) {
+                // add token to local storage
+                localStorage.setItem('token', res.data.token)
+
+                // redirect to application
+                setTimeout(function() {
+                    return window.location.href = "{{appUrl}}"
+                }, 450)
+            }
+        })
+    }
+</script>
