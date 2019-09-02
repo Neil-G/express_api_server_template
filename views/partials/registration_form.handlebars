@@ -1,5 +1,57 @@
-<h2>Register</h2>
-<input type="email" placeholder="email">
-<input type="email" placeholder="verify email">
-<input type="password" placeholder="password">
-<input type="password" placeholder="verify password">
+<form id="registrationForm" class="auth-form">
+    <h2>Register</h2>
+    <label>Email</label>
+    <input id="emailInput" type="email" placeholder="email">
+    <input id="emailVerifyInput" type="email" placeholder="verify email">
+    <label>Password</label>
+    <input id="passwordInput" type="password" placeholder="password">
+    <input id="passwordVerifyInput" type="password" placeholder="verify password">
+    <button type="submit">Submit</button>
+</form>
+
+<script>
+    // attach onsubmit to form
+    var registrationForm = document.getElementById("registrationForm")
+    registrationForm.addEventListener('submit', submitRegistrationForm)
+
+    // submit form method
+    function submitRegistrationForm(e) {
+        e.preventDefault()
+        // get form and values
+        var email = document.getElementById("emailInput").value
+        var emailVerify = document.getElementById("emailVerifyInput").value
+        var password = document.getElementById("passwordInput").value
+        var passwordVerify = document.getElementById("passwordVerifyInput").value
+        
+        // validation
+
+        // TODO: make sure all fields are filled out
+        // TODO: make sure verify fields match
+        // TODO: validate that password passes password rules
+
+        // submit data to server
+        axios({
+            method: 'post',
+            url: '/api/auth/register-and-login',
+            data: {
+                email: email,
+                password: password
+            }
+        // handle server response
+        }).then(res => {
+            // handle errors
+
+            // TODO: handle db duplicate errors
+
+
+            // add token to local storage
+            localStorage.setItem('token', res.data.token)
+
+            // redirect to application
+            setTimeout(function() {
+                return window.location.href = "{{appUrl}}"
+            }, 450)
+
+        })
+    }
+</script>
