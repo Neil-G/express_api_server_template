@@ -10,35 +10,28 @@ const { hashSync, compareSync } = require('bcrypt')
       (Create and Read)
 ********************************/
 router.post('/register-and-login', async (req, res) => {
-
-  let { newUserArgs } = req.body
-
-  newUserArgs.password = hashSync(newUserArgs.password, 10)
-
-  const user = await new User(newUserArgs)
-      .save()
-      .then(res => {
-
-        let formattedUser = {}
-        const keysToOmit = ['password', '__v', 'archived']
-
-        Object.keys(res._doc).forEach(key => {
-          if (key == '_id') {
-            formattedUser.id = res._id
-          } else if (!keysToOmit.includes(key)) {
-            formattedUser[key] = res[key]
-          }
-        })
-
-        return formattedUser
-
-      })
-
-  // give client a new refreshed token
-  const token = jwt.sign({ uid: user.id }, 'secret', { expiresIn: '14 days'})
-
-  return res.send({ user, token })
-
+  try {
+    let newUserArgs = req.body
+  
+    // encrypt password
+    newUserArgs.password = hashSync(newUserArgs.password, 10)
+  
+    // create user
+    let user = await User.create(newUserArgs)
+  
+    // remove data that shouldn't be sent to the client
+    user['__v'] = undefined
+    user['password'] = undefined
+    user['archived'] = undefined
+  
+    // give client a new refreshed token
+    const token = jwt.sign({ uid: user.id }, 'secret', { expiresIn: '14 days'})
+  
+    // return response
+    return res.send({ token })
+  } catch (e) {
+    return res.send(e)
+  }
 })
 
 
