@@ -3,7 +3,7 @@ const router = express.Router()
 const jwt = require('jsonwebtoken')
 const { User } = require('./../db/models')
 const { hashSync, compareSync } = require('bcrypt')
-
+const { sendEmailVerificationEmail } = require('./../vendor/sendgrid')
 
 /********************************
     REGISTER USER AND LOGIN
@@ -27,9 +27,15 @@ router.post('/register-and-login', async (req, res) => {
     // give client a new refreshed token
     const token = jwt.sign({ uid: user.id }, 'secret', { expiresIn: '14 days'})
   
+    // verify registration email
+    sendEmailVerificationEmail({
+      emailAddress: user.emailAddress
+    })
+
     // return response
     return res.send({ token })
   } catch (e) {
+    console.log(e)
     return res.send(e)
   }
 })
