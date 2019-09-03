@@ -25,9 +25,17 @@
         
         // validation
 
-        // TODO: make sure all fields are filled out
-        // TODO: make sure verify fields match
-        // TODO: validate that password passes password rules
+        // make sure all fields are filled out
+        if (!email.trim()) return alert ('please enter an email')
+        if (!emailVerify.trim()) return alert ('please enter the email verification')
+        if (!password.trim()) return alert ('please enter a password')
+        if (!passwordVerify.trim()) return alert ('please enter the password verification')
+
+        // verify that fields match with verification fields
+        if (email.trim() !== emailVerify.trim()) return alert('emails do not match')
+        if (password.trim() !== passwordVerify.trim()) return alert('passwords do not match')
+
+        // validate that password passes password rules
 
         // submit data to server
         axios({
@@ -41,15 +49,19 @@
         }).then(res => {
             // handle errors
 
-            // TODO: handle db duplicate errors
-
+            // handle db duplicate errors
+            if (!!res.data.errmsg && res.data.errmsg.includes('duplicate key error')) {
+                if (res.data.errmsg.includes('emailAddress')) {
+                    return alert(email + ' is already registered. Please login.')
+                }
+            }
 
             // add token to local storage
             localStorage.setItem('token', res.data.token)
 
             // redirect to application
             setTimeout(function() {
-                return window.location.href = "{{appUrl}}"
+                // return window.location.href = "{{appUrl}}"
             }, 450)
 
         })
