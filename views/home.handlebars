@@ -1,3 +1,49 @@
 {{> top_nav}}
-{{> registration_form}}
-{{> login_form}}
+{{> modal}}
+
+<script>
+    
+    function openAuthModal (authAction) {
+        const authModal = document.getElementById('auth-modal')
+        const registrationForm = document.getElementById('registrationForm')
+        const loginForm = document.getElementById('loginForm')
+
+        if (authAction === 'register') {
+            registrationForm.hidden = false
+            loginForm.hidden = true
+        }
+        if (authAction === 'login') {
+            registrationForm.hidden = true
+            loginForm.hidden = false
+        }
+        authModal.hidden = false
+    }
+
+    function closeAuthModal () {
+        const authModal = document.getElementById('auth-modal')
+        authModal.hidden = true
+    }
+
+    var token = localStorage.getItem('token')
+    if (!!token) {
+        axios({
+            method: 'post',
+                url: '/api/auth/login-with-token',
+                headers: {
+                    token: token
+                }
+        }).then(res => {
+            if (!!res.data.token) {
+                // redirect to application
+                console.log("you're logged in")
+                var authNavItem = document.getElementById('auth-top-nav-item')
+                var dashboardLinkNavItem = document.getElementById('dashboard-link-top-nav-item')
+                authNavItem.hidden = true
+                dashboardLinkNavItem.hidden = false
+                // setTimeout(function() {
+                //     return window.location.href = "{{appUrl}}"
+                // }, 450)
+            }
+        })
+    }
+</script>

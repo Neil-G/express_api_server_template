@@ -1,3 +1,14 @@
 <nav class="top-nav">
-    
+    <div class="section-left">
+      <div class="top-nav-item">Logo</div>
+    </div>  
+  <div class="section-right">
+        <div id="auth-top-nav-item" class="top-nav-item">
+            <span class="open-modal-link" onclick="openAuthModal('login')">Login</span> / 
+            <span class="open-modal-link" onclick="openAuthModal('register')">Register</span>
+        </div>
+        <div id="dashboard-link-top-nav-item" class="top-nav-item" hidden>
+            <a href={{appUrl}}>Go to your dashboard</a>
+        </div>
+  </div>  
 </nav>

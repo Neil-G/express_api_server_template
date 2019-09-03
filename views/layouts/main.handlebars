@@ -5,12 +5,16 @@
     <link rel="stylesheet" type="text/css" href="/skeleton.css"> 
     <link rel="stylesheet" type="text/css" href="/index.css"> 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/axios/0.19.0/axios.min.js" integrity="sha256-S1J4GVHHDMiirir9qsXWc8ZWw74PHHafpsHp5PXtjTs=" crossorigin="anonymous"></script>
+    <script src="https://unpkg.com/micromodal/dist/micromodal.min.js"></script>
     <meta charset="utf-8">
     <title>Example App</title>
 </head>
 <body>
     <div id="main">
-        {{{body}}}
+        <div class="body-container">
+            {{{body}}}
+        </div>
+        {{> footer}}
     </div>
 </body>
 </html>
