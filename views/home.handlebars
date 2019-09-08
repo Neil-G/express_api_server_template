@@ -2,7 +2,19 @@
 {{> modal}}
 
 <script>
-    
+    const urlParams = new URLSearchParams(window.location.search)
+    const action = urlParams.get('action')
+    if (!!action && action === 'logout') {
+        localStorage.removeItem('token')
+        window.history.replaceState({}, document.title, '/')
+    }
+
+    var token = localStorage.getItem('token')
+    if (!!token) {
+        var appLink = document.getElementById('app-link')
+        appLink.setAttribute('href', "{{appUrl}}" + "?token=" + token)
+    }
+
     function openAuthModal (authAction) {
         const authModal = document.getElementById('auth-modal')
         const registrationForm = document.getElementById('registrationForm')
@@ -34,15 +46,10 @@
                 }
         }).then(res => {
             if (!!res.data.token) {
-                // redirect to application
-                console.log("you're logged in")
                 var authNavItem = document.getElementById('auth-top-nav-item')
                 var dashboardLinkNavItem = document.getElementById('dashboard-link-top-nav-item')
                 authNavItem.hidden = true
                 dashboardLinkNavItem.hidden = false
-                // setTimeout(function() {
-                //     return window.location.href = "{{appUrl}}"
-                // }, 450)
             }
         })
     }
