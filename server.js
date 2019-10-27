@@ -4,6 +4,7 @@ var exphbs  = require('express-handlebars');
 const bodyParser = require('body-parser')
 const cookieParser = require('cookie-parser')
 const config = require('./config')
+const { resolve } = require('path')
 const chalk = require('chalk')
 const authRoutes = require('./server/routes/auth')
 const graphqlHTTP = require('express-graphql')
@@ -12,6 +13,7 @@ const GraphQLSchema = require('./server/graphql')
 
 // static folder
 app.use(express.static('public'))
+app.use(express.static('./client/build'))
 
 // template engine
 app.engine('handlebars', exphbs());
@@ -41,7 +43,7 @@ app.get('/', function (req, res) {
 
 // React application
 app.get('/app', (req, res) => {
-  res.send('app will be served here')
+  res.sendFile(resolve(`./client/build/_index.html`))
 })
 
 // auth routes
