@@ -15,7 +15,7 @@ module.exports = new GraphQLObjectType({
       lastName: {
         type: GraphQLString
       },
-      email: {
+      emailAddress: {
         type: GraphQLString
       },
     }
