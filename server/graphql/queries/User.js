@@ -1,3 +1,4 @@
+const jwt = require('jsonwebtoken')
 const { GraphQLID, GraphQLString } = require ('graphql')
 const { UserType } = require('./../types')
 const { User } = require('./../../db/models')
@@ -15,7 +16,7 @@ exports.getUser = {
       type: GraphQLString
     },
   },
-  resolve: async (root, { id, email }) => {
+  resolve: async (_, { id, email }) => {
 
     if (!id && !email) {
       throw Error('Must provide either id or email as a paramter to retrieve a user.')
@@ -25,5 +26,18 @@ exports.getUser = {
     const queryArgs = id ? { '_id': id } : { email }
 
     return await User.findOne(queryArgs).lean()
+  }
+}
+
+
+exports.getUserWithToken = {
+  type: UserType,
+  args: {}, // only header token is used
+  resolve: async (_, __, req) => {
+
+    // decode token
+    const decodedToken = jwt.verify(req.headers.token, 'secret')
+
+    return await User.findById(decodedToken.uid).lean()
   }
 }
