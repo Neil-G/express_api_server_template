@@ -3,7 +3,7 @@ const app = express()
 var exphbs  = require('express-handlebars');
 const bodyParser = require('body-parser')
 const cookieParser = require('cookie-parser')
-const config = require('./config')
+const config = require('./config')[process.env.NODE_ENV]
 var cors = require('cors')
 const { resolve } = require('path')
 const chalk = require('chalk')
@@ -41,7 +41,7 @@ app.use((req, _, next) => {
 // public pages
 app.get('/', function (req, res) {
   res.render('home', {
-    appUrl: 'http://localhost:3000' // move to config
+    appUrl: config.appRootUrl // move to config
   });
 });
 
