@@ -35,6 +35,11 @@ app.use((req, _, next) => {
     console.log(chalk.magenta(`${req.method} ${req.path}`))
     return next()
   }
+  if (req.path.includes('graphql')) {
+    console.log(chalk.green(`${req.method} ${req.path}`))
+    return next()
+  }
+  console.log(chalk.yellow(`${req.method} ${req.path}`))
   next()
 })
 
@@ -59,6 +64,14 @@ app.use('/graphql', isLoggedIn, graphqlHTTP({
   graphiql: true,
   pretty: true
 }))
+
+if (process.env.NODE_ENV !== 'production') {
+  app.use('/graphiql', graphqlHTTP({
+    schema: GraphQLSchema,
+    graphiql: true,
+    pretty: true
+  }))
+}
 
 // start up server
 app.listen(5678, () => {
