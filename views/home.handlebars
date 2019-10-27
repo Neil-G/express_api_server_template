@@ -3,8 +3,8 @@
 
 <script>
     const urlParams = new URLSearchParams(window.location.search)
-    const action = urlParams.get('action')
-    if (!!action && action === 'logout') {
+    const shouldRemoveToken = urlParams.get('logout')
+    if (shouldRemoveToken) {
         localStorage.removeItem('token')
         window.history.replaceState({}, document.title, '/')
     }
