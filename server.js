@@ -4,6 +4,7 @@ var exphbs  = require('express-handlebars');
 const bodyParser = require('body-parser')
 const cookieParser = require('cookie-parser')
 const config = require('./config')
+var cors = require('cors')
 const { resolve } = require('path')
 const chalk = require('chalk')
 const authRoutes = require('./server/routes/auth')
@@ -24,6 +25,9 @@ app.set('json spaces', 2)
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(cookieParser());
+
+// cors
+app.use(cors())
 
 // logging
 app.use((req, _, next) => {
