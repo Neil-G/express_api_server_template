@@ -1,5 +1,7 @@
 let mongoose = require('mongoose')
-mongoose.connect('mongodb://user123:password123@ds215988.mlab.com:15988/express_api_server_template') // move to config
+const config = require('./../../../config')[process.env.NODE_ENV]
+
+mongoose.connect(config.mongoUrl) 
 mongoose.Promise = require('bluebird')
 
 
