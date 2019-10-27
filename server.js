@@ -10,7 +10,7 @@ const chalk = require('chalk')
 const authRoutes = require('./server/routes/auth')
 const graphqlHTTP = require('express-graphql')
 const GraphQLSchema = require('./server/graphql')
-
+const { isLoggedIn } = require('./server/middleware/auth')
 
 // static folder
 app.use(express.static('public'))
@@ -54,7 +54,7 @@ app.get('/app', (req, res) => {
 app.use('/api/auth', authRoutes)
 
 // graphql endpoint
-app.use('/graphql', graphqlHTTP({
+app.use('/graphql', isLoggedIn, graphqlHTTP({
   schema: GraphQLSchema,
   graphiql: true,
   pretty: true
