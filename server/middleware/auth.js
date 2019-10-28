@@ -7,7 +7,7 @@ module.exports.isLoggedIn = (req, res, next) => {
         // check that a token is included in the header
         if (!token) {
             res.status(401)
-            res.json({ message: 'user is not authenticated' })
+            return res.json({ message: 'user is not authenticated' })
         }
     
         // decode the json webtoken
@@ -18,7 +18,7 @@ module.exports.isLoggedIn = (req, res, next) => {
     } catch (err) {
         console.log(err)
         res.status(401)
-            res.json({ message: 'user is not authenticated' })
+        res.json({ message: 'user is not authenticated' })
     }
 
 }
