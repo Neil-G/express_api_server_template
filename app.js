@@ -61,7 +61,6 @@ app.use('/api/auth', authRoutes)
 // graphql endpoint
 app.use('/graphql', isLoggedIn, graphqlHTTP({
   schema: GraphQLSchema,
-  graphiql: true,
   pretty: true
 }))
 

@@ -18,7 +18,6 @@ exports.idField = {
     }
 }
 
-
 /*
 |--------------------------------------------------------------------------
 | Generates Basic Type Fields
@@ -45,6 +44,7 @@ const generateTypeFields = config => {
     })
     return typeFields
 }
+exports.generateTypeFields = generateTypeFields
 
 /*
 |--------------------------------------------------------------------------
@@ -56,16 +56,17 @@ const keysBlacklist = ['password']
 exports.getTypesFromMongoModel = modelConfig => {
     const fieldsFromModelConfig = { string: [], boolean: [], number: [], date: []}
     Object.entries(modelConfig).forEach(([key, value]) => {
-        if (value.type === String && ![keysBlacklist].includes(key)) {
+        if (keysBlacklist.includes(key)) return
+        if ((value.type === String || value === String)) {
           fieldsFromModelConfig.string.push(key)
         }
-        if (value.type === Boolean) {
+        if (value.type === Boolean || value === Boolean) {
             fieldsFromModelConfig.boolean.push(key)
         }
-        if (value.type === Number) {
+        if (value.type === Number || value === Number) {
             fieldsFromModelConfig.number.push(key)
         }
-        if (value.type === Date) {
+        if (value.type === Date || value === Date) {
             fieldsFromModelConfig.string.push(key)
         }
       })

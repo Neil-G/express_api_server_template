@@ -1,7 +1,7 @@
 const express = require('express')
 const router = express.Router()
 const jwt = require('jsonwebtoken')
-const { User } = require('./../db/models')
+const { Models: { User }} = require('./../db/models')
 const { hashSync, compareSync } = require('bcrypt')
 const { sendEmailVerificationEmail } = require('./../vendor/sendgrid')
 
