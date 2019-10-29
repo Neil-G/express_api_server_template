@@ -4,12 +4,17 @@ const jwt = require('jsonwebtoken')
 const { Models: { User }} = require('./../db/models')
 const { hashSync, compareSync } = require('bcrypt')
 const { sendEmailVerificationEmail } = require('./../vendor/sendgrid')
+const { routes: { 
+  registerAndLoginRoute,
+  loginWithTokenRoute, 
+  loginWithEmailAndPassword,
+}} = require('./../../constants')
 
 /********************************
     REGISTER USER AND LOGIN
       (Create and Read)
 ********************************/
-router.post('/register-and-login', async (req, res) => {
+router.post(registerAndLoginRoute, async (req, res) => {
   try {
     let newUserArgs = req.body
   
@@ -45,7 +50,7 @@ router.post('/register-and-login', async (req, res) => {
       TOKEN LOGIN
         (Read)
 ********************************/
-router.post('/login-with-token', async (req, res) => {
+router.post(loginWithTokenRoute, async (req, res) => {
 
   // get user input from login form
   const { token } = req.headers
@@ -83,7 +88,7 @@ router.post('/login-with-token', async (req, res) => {
 |--------------------------------------------------------------------------
 */
 
-router.post('/login-with-email-and-password', async (req, res) => {
+router.post(loginWithEmailAndPassword, async (req, res) => {
 
   // get user input from login form
   const { emailAddress, password } = req.body

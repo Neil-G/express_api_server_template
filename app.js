@@ -11,7 +11,19 @@ const authRoutes = require('./server/routes/auth')
 const graphqlHTTP = require('express-graphql')
 const GraphQLSchema = require('./server/graphql')
 const { isLoggedIn } = require('./server/middleware/auth')
+const { routes: {
+  graphQLRoute,
+  graphiQLRoute,
+  apiAuthRoutesRoot,
+  allAppRoutes
+}} = require('./constants')
 
+console.log(
+  graphQLRoute,
+  graphiQLRoute,
+  apiAuthRoutesRoot,
+  allAppRoutes
+)
 // static folder
 app.use(express.static('public'))
 app.use(express.static('./client/build'))
@@ -44,28 +56,28 @@ app.use((req, _, next) => {
 })
 
 // public pages
-app.get('/', function (req, res) {
+app.get('/', function (_, res) {
   res.render('home', {
     appUrl: config.appRootUrl // move to config
   });
 });
 
 // React application
-app.get('/app', (req, res) => {
+app.get(allAppRoutes, (_, res) => {
   res.sendFile(resolve(`./client/build/_index.html`))
 })
 
 // auth routes
-app.use('/api/auth', authRoutes)
+app.use(apiAuthRoutesRoot, authRoutes)
 
 // graphql endpoint
-app.use('/graphql', isLoggedIn, graphqlHTTP({
+app.use(graphQLRoute, isLoggedIn, graphqlHTTP({
   schema: GraphQLSchema,
   pretty: true
 }))
 
 if (process.env.NODE_ENV !== 'production') {
-  app.use('/graphiql', graphqlHTTP({
+  app.use(graphiQLRoute, graphqlHTTP({
     schema: GraphQLSchema,
     graphiql: true,
     pretty: true
