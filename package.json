@@ -25,7 +25,8 @@
     "jsonwebtoken": "^8.2.0",
     "lodash": "^4.17.15",
     "mongoose": "^5.0.10",
-    "nodemon": "^1.17.2"
+    "nodemon": "^1.17.2",
+    "pm2": "^4.1.2"
   },
   "devDependencies": {
     "newman": "^3.9.3"
