@@ -3,7 +3,8 @@ const fs = require('fs')
 const { resolve } = require('path')
 const { Models, ModelTemplates } = require('./../../db/models')
 const types = require('./../types')
-const { getTypesFromMongoModel } = require('./../types/utils')
+const { getTypesFromMongoModel, generateTypeFields } = require('./../types/utils')
+const { controllerConfigs } = require('./../../controllers')
 
 /*
 |--------------------------------------------------------------------------
@@ -62,10 +63,21 @@ fs.readdirSync(__dirname)
     combinedQueries = { ...combinedQueries, ...customQueries }
 })
 
+const getAllControllerConfigs = {
+  type: GraphQLList(new GraphQLObjectType({
+    name: 'controller_config',
+    fields: () => generateTypeFields({
+      string: ['route', 'method', 'fileName']
+    })
+  })),
+  resolve: () => controllerConfigs,
+}
+
 
 module.exports = new GraphQLObjectType({
   name: 'Query',
   fields: () => ({ 
+    getAllControllerConfigs,
     ...generatedQueries, 
     ...combinedQueries 
   }),

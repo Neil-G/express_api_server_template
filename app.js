@@ -7,7 +7,7 @@ const config = require('./config')[process.env.NODE_ENV]
 var cors = require('cors')
 const { resolve } = require('path')
 const chalk = require('chalk')
-const authRoutes = require('./server/routes/auth')
+const { configuredControllers } = require('./server/controllers')
 const graphqlHTTP = require('express-graphql')
 const GraphQLSchema = require('./server/graphql')
 const { isLoggedIn } = require('./server/middleware/auth')
@@ -18,12 +18,6 @@ const { routes: {
   allAppRoutes
 }} = require('./constants')
 
-console.log(
-  graphQLRoute,
-  graphiQLRoute,
-  apiAuthRoutesRoot,
-  allAppRoutes
-)
 // static folder
 app.use(express.static('public'))
 app.use(express.static('./client/build'))
@@ -56,7 +50,7 @@ app.use((req, _, next) => {
 })
 
 // public pages
-app.get('/', function (_, res) {
+app.get('/', (_, res) => {
   res.render('home', {
     appUrl: config.appRootUrl // move to config
   });
@@ -67,8 +61,8 @@ app.get(allAppRoutes, (_, res) => {
   res.sendFile(resolve(`./client/build/_index.html`))
 })
 
-// auth routes
-app.use(apiAuthRoutesRoot, authRoutes)
+// configured controllers
+app.use(apiAuthRoutesRoot, configuredControllers)
 
 // graphql endpoint
 app.use(graphQLRoute, isLoggedIn, graphqlHTTP({
