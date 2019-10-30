@@ -41,6 +41,17 @@ Object.keys(ModelTemplates).map(modelName => {
       )
     }
   }
+
+  // findByIdAndUpdate
+
+  // updateMany
+
+  // findOneAndDelete
+
+  // findByIdAndDelete
+
+  // deleteMany
+
 })
 
 module.exports = new GraphQLObjectType({

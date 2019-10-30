@@ -33,7 +33,10 @@ Object.keys(ModelTemplates).map(modelName => {
     }
   }
 
-  // find (multiple)
+  // findOne
+
+
+  // find (many)
   generatedQueries[`find${modelName}s`] = {
     description: `find ${modelName}s`,
     type: GraphQLList(Type),
