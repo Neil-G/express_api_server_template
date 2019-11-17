@@ -1,6 +1,6 @@
 const jwt = require('jsonwebtoken')
 
-module.exports.isLoggedIn = (req, res, next) => {
+module.exports.isLoggedIn = function isLoggedIn (req, res, next) {
     try {
         const token = req.headers.token
     
@@ -15,8 +15,8 @@ module.exports.isLoggedIn = (req, res, next) => {
 
         next()
 
-    } catch (err) {
-        console.log(err)
+    } catch (error) {
+        console.log(error)
         res.status(401)
         res.json({ message: 'user is not authenticated' })
     }

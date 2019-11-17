@@ -40,7 +40,7 @@
     if (!!token) {
         axios({
             method: 'post',
-                url: '/api/auth/login-with-token',
+                url: "{{loginWithTokenRoute}}",
                 headers: {
                     token: token
                 }

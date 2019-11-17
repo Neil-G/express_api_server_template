@@ -24,7 +24,8 @@
         // submit data to server
         axios({
             method: 'post',
-            url: '/api/auth/login-with-email-and-password',
+            // url: '/api/auth/login-with-email-and-password',
+            url: "{{loginWithEmailAndPassword}}"
             data: {
                 emailAddress: email,
                 password: password

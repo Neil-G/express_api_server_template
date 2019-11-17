@@ -7,14 +7,17 @@ const config = require('./config')[process.env.NODE_ENV]
 var cors = require('cors')
 const { resolve } = require('path')
 const chalk = require('chalk')
-const { configuredControllers, controllerConfigs } = require('./server/controllers')
+const { configuredControllersRouter, controllerConfigs } = require('./server/controllers')
 const graphqlHTTP = require('express-graphql')
 const GraphQLSchema = require('./server/graphql')
+const { errors } = require('celebrate');
 const { isLoggedIn } = require('./server/middleware/auth')
 const { routes: {
   graphQLRoute,
   graphiQLRoute,
-  apiAuthRoutesRoot,
+  registerAndLoginRoute,
+  loginWithTokenRoute,
+  loginWithEmailAndPassword,
   allAppRoutes
 }} = require('./constants')
 
@@ -52,14 +55,16 @@ app.use((req, _, next) => {
 // public pages
 app.get('/', (_, res) => {
   res.render('home', {
-    appUrl: config.appRootUrl // move to config
+    registerAndLoginRoute,
+    loginWithTokenRoute,
+    loginWithEmailAndPassword,
+    appUrl: config.appRootUrl 
   });
 });
 
 app.get('/api-docs', (_, res) => {
   res.render('api_docs', {
     controllerConfigs,
-    appUrl: config.appRootUrl // move to config
   });
 });
 
@@ -69,7 +74,7 @@ app.get(allAppRoutes, (_, res) => {
 })
 
 // configured controllers
-app.use('/', configuredControllers)
+app.use('/', configuredControllersRouter)
 
 // graphql endpoint
 app.use(graphQLRoute, isLoggedIn, graphqlHTTP({
@@ -86,7 +91,10 @@ if (process.env.NODE_ENV !== 'production') {
 }
 
 // 404 page
-app.use('*', (req, res) => res.send('404'))
+app.use('*', (_, res) => res.send('404'))
+
+// handle errors
+app.use(errors());
 
 // start up server
 app.listen(5678, () => {

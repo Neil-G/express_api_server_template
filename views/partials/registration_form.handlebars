@@ -42,7 +42,7 @@
         // submit data to server
         axios({
             method: 'post',
-            url: '/api/auth/register-and-login',
+            url: "{{registerAndLoginRoute}}",
             data: {
                 emailAddress: email,
                 password: password
