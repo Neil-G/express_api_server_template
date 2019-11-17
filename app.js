@@ -21,6 +21,8 @@ const { routes: {
   allAppRoutes
 }} = require('./constants')
 
+const PORT = 5678
+
 // static folder
 app.use(express.static('public'))
 app.use(express.static('./client/build'))
@@ -97,6 +99,6 @@ app.use('*', (_, res) => res.send('404'))
 app.use(errors());
 
 // start up server
-app.listen(5678, () => {
-  console.log('Example app listening on port 5678!')
+app.listen(PORT, () => {
+  console.log(`Example app listening on port ${PORT}!`)
 })
