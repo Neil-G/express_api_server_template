@@ -1,12 +1,13 @@
 const { GraphQLString } = require('graphql')
-const jwt = require('jsonwebtoken')
-
+const uuidv1 = require('uuid/v1');
+const { createAuthToken } = require('./../../utils')
+const { variableNames: { authTokenKey }} = require('./../../../constants')
 
 module.exports =  {
   config: {
     firstName:  String,
     lastName:   String,
-    userName:   { type: String,   unique: true },
+    userName:   { type: String,   unique: true, default: uuidv1() },
     emailAddress:      { type: String,   required: true,   unique: true },
     isEmailAddressVerified:   { type: Boolean, default: false },
     password:   { type: String,   required: true },   
@@ -14,9 +15,9 @@ module.exports =  {
   },
   graphql: {
     customFields: {
-      token: {
+      [authTokenKey]: {
         type: GraphQLString,
-        resolve: ({ _id }) => jwt.sign({ uid: _id }, 'secret', { expiresIn: '14 days'})
+        resolve: user => createAuthToken({ user })
       }
     }
   }

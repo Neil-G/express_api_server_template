@@ -35,13 +35,15 @@
             if (res.data.type === 'incorrectCredentials')
                 return alert(res.data.message)
 
-            if (res.data.token) {
+            var authTokenKey = "{{authTokenKey}}"
+            var authToken = res.data[authTokenKey]
+            if (authToken) {
                 // add token to local storage
-                localStorage.setItem('token', res.data.token)
+                localStorage.setItem(authTokenKey, authToken)
 
                 // redirect to application
                 setTimeout(function() {
-                    return window.location.href = "{{appUrl}}" + '?token=' + res.data.token
+                    return window.location.href = "{{appUrl}}" + '?'  + authTokenKey + '=' + authToken
                 }, 450)
             }
         })

@@ -49,8 +49,6 @@
             }
         // handle server response
         }).then(res => {
-            // handle errors
-
             // handle db duplicate errors
             if (!!res.data.errmsg && res.data.errmsg.includes('duplicate key error')) {
                 if (res.data.errmsg.includes('emailAddress')) {
@@ -59,11 +57,13 @@
             }
 
             // add token to local storage
-            localStorage.setItem('token', res.data.token)
+            var authTokenKey = "{{authTokenKey}}"
+            var authToken = res.data[authTokenKey]
+            localStorage.setItem(authTokenKey, authToken)
 
             // redirect to application
             setTimeout(function() {
-                return window.location.href = "{{appUrl}}" + '?token=' + res.data.token
+                return window.location.href = "{{appUrl}}" + '?'  + authTokenKey + '=' + authToken
             }, 450)
 
         })

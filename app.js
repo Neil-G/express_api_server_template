@@ -12,13 +12,17 @@ const graphqlHTTP = require('express-graphql')
 const GraphQLSchema = require('./server/graphql')
 const { errors } = require('celebrate');
 const { isLoggedIn } = require('./server/middleware/auth')
-const { routes: {
-  graphQLRoute,
-  graphiQLRoute,
-  registerAndLoginRoute,
-  loginWithTokenRoute,
-  loginWithEmailAndPassword,
-  allAppRoutes
+const { 
+  variableNames: { 
+    authTokenKey 
+  }, 
+  routes: {
+    graphQLRoute,
+    graphiQLRoute,
+    registerAndLoginRoute,
+    loginWithTokenRoute,
+    loginWithEmailAndPassword,
+    allAppRoutes
 }} = require('./constants')
 
 const PORT = 5678
@@ -57,6 +61,7 @@ app.use((req, _, next) => {
 // public pages
 app.get('/', (_, res) => {
   res.render('home', {
+    authTokenKey,
     registerAndLoginRoute,
     loginWithTokenRoute,
     loginWithEmailAndPassword,

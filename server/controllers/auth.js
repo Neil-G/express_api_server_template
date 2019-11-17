@@ -2,11 +2,12 @@ const { Joi } = require('celebrate')
 const { hashSync, compareSync } = require('bcrypt')
 const jwt = require('jsonwebtoken')
 const { Models: { User }} = require('./../db/models')
-const { routes: { 
+const { variableNames: { authTokenKey }, routes: { 
 	registerAndLoginRoute,
 	loginWithTokenRoute, 
 	loginWithEmailAndPassword,
 }} = require('../../constants')
+const { createAuthToken, decodeAuthToken } = require('./../utils')
   
 module.exports = [
     {
@@ -30,16 +31,16 @@ module.exports = [
 				let user = await User.create(newUserArgs)
 			
 				// give client a new refreshed token
-				const token = jwt.sign({ uid: user.id }, 'secret', { expiresIn: '14 days' })
+				const token = createAuthToken({ user })
 		
 				// return response
-				return res.send({ token })
-			} catch (e) {
+				return res.send({ [authTokenKey]: token })
+			} catch (error) {
 				console.log(error)
 				return res.send(error)
 			}
 		},
-		output: `token`
+		output: authTokenKey
 	},
 	{
 		route: loginWithEmailAndPassword,
@@ -63,10 +64,10 @@ module.exports = [
 				if (!!user && compareSync(password, user.password)) {
 			  
 				  // create json web token to maintain session on client
-				  const token = jwt.sign({ uid: user._id }, 'secret', { expiresIn: '14 days'})
+				  const token = createAuthToken({ user })
 			  
 				  // return token to client
-				  return res.send({ token })
+				  return res.send({ [authTokenKey]: token })
 			  
 				} else {
 			  
@@ -81,7 +82,7 @@ module.exports = [
 				return res.send(error)
 			}
 		},
-		output: `token`
+		output: authTokenKey
 	},
 	{
 		route: loginWithTokenRoute,
@@ -89,35 +90,35 @@ module.exports = [
 		description: 'allows user to login with header token',
 		celebrate: {
 			headers: Joi.object({
-				token: Joi.string().required(),
+				[authTokenKey]: Joi.string().required(),
 			})
 		},
 		controller: async (req, res) => {
 			try {
 				// get user input from login form
-				const { token } = req.headers
-			
-				if (!token) return res.send({ token: undefined })
+				const token = req.headers[authTokenKey]
+
+				if (!token) return res.send({ [authTokenKey]: undefined })
 			
 				// decode token
-				const decodedToken = jwt.verify(token, 'secret')
+				const decodedToken = decodeAuthToken({ token })
 			
 				// fetch user from db
 				const user = await User.findById(decodedToken.uid).lean()
 			
 				// no user found with id
-				if (!user) return res.send({ token: undefined })
+				if (!user) return res.send({ [authTokenKey]: undefined })
 			
 				// give client a new refreshed token
-				const refreshedToken = jwt.sign({ uid: user._id }, 'secret', { expiresIn: '14 days' })
+				const refreshedToken = createAuthToken({ user })
 			
-				res.send({ token: refreshedToken })
+				res.send({ [authTokenKey]: refreshedToken })
 		  
 			} catch(error) {
 				console.log(e)
 				return res.send(e)
 			}
 		  },
-		  output: 'token'
+		  output: authTokenKey
 	}
 ]

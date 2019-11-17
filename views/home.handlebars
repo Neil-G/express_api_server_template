@@ -2,19 +2,38 @@
 {{> modal}}
 
 <script>
+    // handle navigation from logout
     const urlParams = new URLSearchParams(window.location.search)
     const shouldRemoveToken = urlParams.get('logout')
+    var authTokenKey = "{{authTokenKey}}"
     if (shouldRemoveToken) {
-        localStorage.removeItem('token')
+        localStorage.removeItem(authTokenKey)
         window.history.replaceState({}, document.title, '/')
     }
 
-    var token = localStorage.getItem('token')
+    // check for valid token
+    var token = localStorage.getItem(authTokenKey)
     if (!!token) {
-        var appLink = document.getElementById('app-link')
-        appLink.setAttribute('href', "{{appUrl}}" + "?token=" + token)
+        axios({
+            method: 'post',
+                url: "{{loginWithTokenRoute}}",
+                headers: {
+                    [authTokenKey]: token
+                }
+        }).then(res => {
+            if (!!res.data[authTokenKey]) {
+                var authNavItem = document.getElementById('auth-top-nav-item')
+                var dashboardLinkNavItem = document.getElementById('dashboard-link-top-nav-item')
+                authNavItem.hidden = true
+                dashboardLinkNavItem.hidden = false
+                var appLink = document.getElementById('app-link')
+                appLink.setAttribute('href', "{{appUrl}}" + '?'  + authTokenKey + '=' + token)
+            }
+        })
+        
     }
 
+    // open and close login and registration modals
     function openAuthModal (authAction) {
         const authModal = document.getElementById('auth-modal')
         const registrationForm = document.getElementById('registrationForm')
@@ -34,23 +53,5 @@
     function closeAuthModal () {
         const authModal = document.getElementById('auth-modal')
         authModal.hidden = true
-    }
-
-    var token = localStorage.getItem('token')
-    if (!!token) {
-        axios({
-            method: 'post',
-                url: "{{loginWithTokenRoute}}",
-                headers: {
-                    token: token
-                }
-        }).then(res => {
-            if (!!res.data.token) {
-                var authNavItem = document.getElementById('auth-top-nav-item')
-                var dashboardLinkNavItem = document.getElementById('dashboard-link-top-nav-item')
-                authNavItem.hidden = true
-                dashboardLinkNavItem.hidden = false
-            }
-        })
     }
 </script>

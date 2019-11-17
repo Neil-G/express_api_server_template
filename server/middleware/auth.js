@@ -1,8 +1,9 @@
-const jwt = require('jsonwebtoken')
+const { decodeAuthToken } = require('./../utils')
+const { variableNames: { authTokenKey }} = require('./../../constants')
 
 module.exports.isLoggedIn = function isLoggedIn (req, res, next) {
     try {
-        const token = req.headers.token
+        const token = req.headers[authTokenKey]
     
         // check that a token is included in the header
         if (!token) {
@@ -11,8 +12,7 @@ module.exports.isLoggedIn = function isLoggedIn (req, res, next) {
         }
     
         // decode the json webtoken
-        jwt.verify(token, 'secret')
-
+        decodeAuthToken({ token })
         next()
 
     } catch (error) {
