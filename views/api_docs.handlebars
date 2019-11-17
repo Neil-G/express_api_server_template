@@ -1,0 +1,21 @@
+{{> top_nav}}
+<h1>Api Docs</h1>
+<div style="padding: 0 8px;">
+
+    <table>
+    <thead>
+        <tr>
+        <th>Method</th>
+        <th>Route</th>
+        </tr>
+    </thead>
+    <tbody>
+        {{#each controllerConfigs as |config|}}
+                <tr>
+                    <td>{{config.method}}</td>
+                    <td>{{config.route}}</td>
+                </tr>
+            {{/each}}
+    </tbody>
+    </table>
+</div>

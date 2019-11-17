@@ -8,9 +8,9 @@ const allAppRoutes = [appLoginRootRoute, '/user-profile*']
 
 // API AUTH ROUTES
 const apiAuthRoutesRoot = '/api/auth'
-const registerAndLoginRoute = '/register-and-login'
-const loginWithTokenRoute = '/login-with-token'
-const loginWithEmailAndPassword = '/login-with-email-and-password'
+const registerAndLoginRoute = [apiAuthRoutesRoot, 'register-and-login'].join('/')
+const loginWithTokenRoute = [apiAuthRoutesRoot, 'login-with-token'].join('/')
+const loginWithEmailAndPassword = [apiAuthRoutesRoot, 'login-with-email-and-password'].join('/')
 
 module.exports = {
     graphQLRoute,

@@ -7,7 +7,7 @@ const config = require('./config')[process.env.NODE_ENV]
 var cors = require('cors')
 const { resolve } = require('path')
 const chalk = require('chalk')
-const { configuredControllers } = require('./server/controllers')
+const { configuredControllers, controllerConfigs } = require('./server/controllers')
 const graphqlHTTP = require('express-graphql')
 const GraphQLSchema = require('./server/graphql')
 const { isLoggedIn } = require('./server/middleware/auth')
@@ -56,13 +56,20 @@ app.get('/', (_, res) => {
   });
 });
 
+app.get('/api-docs', (_, res) => {
+  res.render('api_docs', {
+    controllerConfigs,
+    appUrl: config.appRootUrl // move to config
+  });
+});
+
 // React application
 app.get(allAppRoutes, (_, res) => {
   res.sendFile(resolve(`./client/build/_index.html`))
 })
 
 // configured controllers
-app.use(apiAuthRoutesRoot, configuredControllers)
+app.use('/', configuredControllers)
 
 // graphql endpoint
 app.use(graphQLRoute, isLoggedIn, graphqlHTTP({
@@ -77,6 +84,9 @@ if (process.env.NODE_ENV !== 'production') {
     pretty: true
   }))
 }
+
+// 404 page
+app.use('*', (req, res) => res.send('404'))
 
 // start up server
 app.listen(5678, () => {
