@@ -3,7 +3,6 @@ const jwt = require('jsonwebtoken')
 
 
 module.exports =  {
-  name: 'User',
   config: {
     firstName:  String,
     lastName:   String,

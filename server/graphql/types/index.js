@@ -4,9 +4,9 @@ const { idField, getTypesFromMongoModel } = require('./utils')
 const models = require('./../../db/models')
 
 const generatedTypes = {}
-Object.entries(models.ModelTemplates).map(([modelFileName, modelTemplate]) => {
-  generatedTypes[modelFileName] = new GraphQLObjectType({
-    name: modelFileName.toLowerCase(),
+Object.entries(models.ModelTemplates).map(([modelFilename, modelTemplate]) => {
+  generatedTypes[modelFilename] = new GraphQLObjectType({
+    name: modelFilename.toLowerCase(),
     fields:  () => ({ 
         ...idField, 
         ...get(modelTemplate, 'graphql.customFields', {}), 

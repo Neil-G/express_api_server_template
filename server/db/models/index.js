@@ -1,6 +1,6 @@
 let mongoose = require('mongoose')
 const fs = require('fs')
-const { resolve } = require('path')
+const { resolve, basename } = require('path')
 const config = require('./../../../config')[process.env.NODE_ENV]
 
 mongoose.connect(config.mongoUrl) 
@@ -20,15 +20,17 @@ function createModel (ModelTemplate) {
 // templates are exported also
 const configuredModels = { Models: {}, ModelTemplates: {}}
 fs.readdirSync(__dirname)
-  .filter(fileName => fileName !== 'index.js')
-  .forEach(fileName => {
-    const modelFileName = fileName.slice(0, -3)
-    const ModelTemplate = require(resolve(__dirname, fileName))
+  .filter(filename => filename !== basename(__filename))
+  .forEach(filename => {
+    const ModelTemplate = require(resolve(__dirname, filename))
+    if (!ModelTemplate.config) return
+    const modelFilename = filename.slice(0, -3)
     // add fields common to all models
+    ModelTemplate.name = modelFilename
     ModelTemplate.config.createdAt = { type: Date, default: Date.now }
     ModelTemplate.config.lastUpdated = { type: Date }
-    configuredModels.ModelTemplates[modelFileName] = ModelTemplate
-    configuredModels.Models[modelFileName] = createModel(ModelTemplate)
+    configuredModels.ModelTemplates[modelFilename] = ModelTemplate
+    configuredModels.Models[modelFilename] = createModel(ModelTemplate)
 })
 
 module.exports = configuredModels
