@@ -8,8 +8,9 @@ module.exports =  {
     lastName:   String,
     userName:   { type: String,   unique: true },
     emailAddress:      { type: String,   required: true,   unique: true },
-    password:   { type: String,   required: true },
-    archived:   { type: Boolean,  default: false },
+    isEmailAddressVerified:   { type: Boolean, default: false },
+    password:   { type: String,   required: true },   
+    isArchived:   { type: Boolean,  default: false }, // soft delete
   },
   graphql: {
     customFields: {
