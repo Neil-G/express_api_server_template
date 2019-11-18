@@ -48,10 +48,11 @@ body {
 
 .auth-form {
     border-radius: 4px;
+    box-sizing: border-box;
     display: flex;
     flex-direction: column;
-    padding: 20px;
-    width: 400px;
+    padding: 0 20px;
+    width: 100%;
 }
 
 .main-footer {
@@ -70,9 +71,17 @@ body {
 }
 
 .modal {
-    border-radius: 4px;
-    margin: auto;
     background: white;
+    border-radius: 4px;
+    height: fit-content;
+    margin: 15% auto;
+    max-width: 450px;
+    width: 95vw;
+}
+
+button.close-auth-modal-button {
+    margin: 20px;
+    float: right;
 }
 
 .open-modal-link {
