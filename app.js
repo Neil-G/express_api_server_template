@@ -54,6 +54,10 @@ app.use((req, _, next) => {
     console.log(chalk.green(`${req.method} ${req.path}`))
     return next()
   }
+  if (req.path.includes('.css') || req.path.includes('.ico')) {
+    console.log(chalk.blueBright(`${req.method} ${req.path}`))
+    return next()
+  }
   console.log(chalk.yellow(`${req.method} ${req.path}`))
   next()
 })
