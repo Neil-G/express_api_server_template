@@ -54,4 +54,10 @@
         const authModal = document.getElementById('auth-modal')
         authModal.hidden = true
     }
+
+    const authModal = document.getElementById('auth-modal')
+    authModal.addEventListener('click', function(event) {
+        if (event.target.id === 'auth-modal-background') closeAuthModal()
+    })
+
 </script>
