@@ -9,6 +9,6 @@ exports.getUserWithToken = {
   resolve: async (_, __, { headers }) => {
     // decode token
     const decodedToken = decodeAuthToken({ token: headers[authTokenKey] })
-    return await User.findById(decodedToken.uid).lean()
+    return await User.findById(decodedToken.uid)
   }
 }
