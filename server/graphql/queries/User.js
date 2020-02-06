@@ -1,4 +1,4 @@
-const { User: UserType } = require('./../types')
+const { UserType } = require('./../types')
 const { Models: { User }} = require('./../../db/models')
 const { decodeAuthToken } = require('./../../utils')
 const { variableNames: { authTokenKey }} = require('./../../../constants')

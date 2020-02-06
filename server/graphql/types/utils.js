@@ -14,7 +14,7 @@ const {
 exports.idField = { 
     id: {
         type: GraphQLID,
-        resolve: ({ _id }) => _id
+        resolve: ({ _id }) => String(_id)
     }
 }
 

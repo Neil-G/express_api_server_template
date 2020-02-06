@@ -15,9 +15,9 @@ const { controllerConfigs } = require('./../../controllers')
 // generate queries based on mongoose queries
 const generatedQueries = {}
 Object.keys(ModelTemplates).map(modelName => {
-  const Type = types[modelName]
-  const Model = Models[modelName]
   const ModelTemplate = ModelTemplates[modelName]
+  const Type = types[ModelTemplate.typeName]
+  const Model = Models[modelName]
 
   // findById
   generatedQueries[`find${modelName}ById`] = {

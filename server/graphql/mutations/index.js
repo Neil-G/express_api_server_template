@@ -11,9 +11,9 @@ const { getTypesFromMongoModel } = require('./../types/utils')
 
 const genericMutations = {}
 Object.keys(ModelTemplates).map(modelName => {
-  const Type = types[modelName]
-  const Model = Models[modelName]
   const ModelTemplate = ModelTemplates[modelName]
+  const Type = types[ModelTemplate.typeName]
+  const Model = Models[modelName]
 
   // findOneAndUpdate
   genericMutations[`findOne${modelName}AndUpdate`] =  {
