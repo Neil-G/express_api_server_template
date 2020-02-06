@@ -8,12 +8,19 @@ mongoose.Promise = require('bluebird')
 
 
 // helper function for creating mongodb models from configs
-function createModel (ModelTemplate) {
-  
-  return mongoose.model(
-    ModelTemplate.name,
-    mongoose.Schema(ModelTemplate.config)
-  )
+const createModel = (ModelTemplate) => {
+  // Create schema from model template config
+  const schema = new mongoose.Schema(ModelTemplate.config, {
+    minimize: false,
+  })
+  // Add virtual fields
+  if (ModelTemplate.virtuals) {
+    Object.keys(ModelTemplate.virtuals).forEach(fieldName => {
+      const virtualMethod = ModelTemplate.virtuals[fieldName].resolve
+      schema.virtual(fieldName).get(virtualMethod)
+    })
+  }
+  return mongoose.model(ModelTemplate.name, schema)
 }
 
 // configure models from templates

@@ -15,7 +15,7 @@ const customTypeFields = () => {
     ...idField,
     [authTokenKey]: {
       type: GraphQLString,
-      resolve: user => createAuthToken({ user })
+      resolve: user => user[authTokenKey]
     }
   }
 }

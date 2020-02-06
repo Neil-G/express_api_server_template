@@ -14,4 +14,12 @@ module.exports =  {
     password:   { type: String,   required: true },   
     isArchived:   { type: Boolean,  default: false }, // soft delete
   },
+  virtuals: {
+    [authTokenKey]: {
+      type: String,
+      resolve: function() {
+        return createAuthToken({ user: this })
+      }
+    }
+  }
 }
