@@ -6,8 +6,12 @@ const config = require('./../../../config')[process.env.NODE_ENV]
 mongoose.connect(config.mongoUrl) 
 mongoose.Promise = require('bluebird')
 
+/*
+|--------------------------------------------------------------------------
+| Create Model Helper Method
+|--------------------------------------------------------------------------
+*/
 
-// helper function for creating mongodb models from configs
 const createModel = (ModelTemplate) => {
   // Create schema from model template config
   const schema = new mongoose.Schema(ModelTemplate.config, {
@@ -20,24 +24,27 @@ const createModel = (ModelTemplate) => {
       schema.virtual(fieldName).get(virtualMethod)
     })
   }
-  return mongoose.model(ModelTemplate.name, schema)
+  return mongoose.model(ModelTemplate.modelName, schema)
 }
 
-// configure models from templates
-// templates are exported also
+/*
+|--------------------------------------------------------------------------
+| Configure Models and Export Templates and Configured Models
+|--------------------------------------------------------------------------
+*/
+
 const configuredModels = { Models: {}, ModelTemplates: {}}
 fs.readdirSync(__dirname)
   .filter(filename => filename !== basename(__filename))
   .forEach(filename => {
     const ModelTemplate = require(resolve(__dirname, filename))
     if (!ModelTemplate.config) return
-    const modelFilename = filename.slice(0, -3)
-    // add fields common to all models
-    ModelTemplate.name = modelFilename
+    // Add fields common to all models
     ModelTemplate.config.createdAt = { type: Date, default: Date.now }
     ModelTemplate.config.lastUpdated = { type: Date }
-    configuredModels.ModelTemplates[modelFilename] = ModelTemplate
-    configuredModels.Models[modelFilename] = createModel(ModelTemplate)
+    // Make template and configured model available for export
+    configuredModels.ModelTemplates[ModelTemplate.modelName] = ModelTemplate
+    configuredModels.Models[ModelTemplate.modelName] = createModel(ModelTemplate)
 })
 
 module.exports = configuredModels

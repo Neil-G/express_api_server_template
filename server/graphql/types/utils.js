@@ -12,39 +12,11 @@ const {
 */
 
 exports.idField = { 
-    id: {
-        type: GraphQLID,
-        resolve: ({ _id }) => String(_id)
-    }
+  id: {
+    type: GraphQLID,
+    resolve: ({ _id }) => String(_id)
+  }
 }
-
-/*
-|--------------------------------------------------------------------------
-| Generates Basic Type Fields
-|--------------------------------------------------------------------------
-*/
-
-const generateTypeFields = config => {
-    const typeFields = {}
-    const { id = [], string = [], boolean = [], number = [], date = [] } = config
-    id.forEach(key => {
-      typeFields[key] = { type: GraphQLID }
-    })
-    string.forEach(key => {
-      typeFields[key] = { type: GraphQLString }
-    })
-    boolean.forEach(key => {
-      typeFields[key] = { type: GraphQLBoolean }
-    })
-    number.forEach(key => {
-      typeFields[key] = { type: GraphQLFloat }
-    })
-    date.forEach(key => {
-      typeFields[key] = { type: GraphQLString }
-    })
-    return typeFields
-}
-exports.generateTypeFields = generateTypeFields
 
 /*
 |--------------------------------------------------------------------------
@@ -53,22 +25,43 @@ exports.generateTypeFields = generateTypeFields
 */
 
 const keysBlacklist = ['password']
+// TODO: account for foreign keys, objects, arrays, and arrays of objects
 exports.getTypesFromMongoModel = modelConfig => {
-    const fieldsFromModelConfig = { string: [], boolean: [], number: [], date: []}
-    Object.entries(modelConfig).forEach(([key, value]) => {
-        if (keysBlacklist.includes(key)) return
-        if ((value.type === String || value === String)) {
-          fieldsFromModelConfig.string.push(key)
-        }
-        if (value.type === Boolean || value === Boolean) {
-            fieldsFromModelConfig.boolean.push(key)
-        }
-        if (value.type === Number || value === Number) {
-            fieldsFromModelConfig.number.push(key)
-        }
-        if (value.type === Date || value === Date) {
-            fieldsFromModelConfig.string.push(key)
-        }
-      })
-    return generateTypeFields(fieldsFromModelConfig)
+  const typeFields = {}
+  Object.entries(modelConfig).forEach(([key, value]) => {
+    if (keysBlacklist.includes(key)) return
+    if ((value.type === String || value === String)) {
+      typeFields[key] = { type: GraphQLString }
+    }
+    if (value.type === Boolean || value === Boolean) {
+      typeFields[key] = { type: GraphQLBoolean }
+    }
+    if (value.type === Number || value === Number) {
+      typeFields[key] = { type: GraphQLFloat }
+    }
+    if (value.type === Date || value === Date) {
+      typeFields[key] = { type: GraphQLString }
+    }
+  })
+  return typeFields
+}
+
+/*
+|--------------------------------------------------------------------------
+| Create Type Fields From Virtuals
+|--------------------------------------------------------------------------
+*/
+
+exports.getVirtualTypeFields = modelVirtuals => {
+  const typeFields = {}
+  Object.entries(modelVirtuals).forEach(([key, { type, _}]) => {
+    if (!type) return
+    typeFields[key] = {}
+    typeFields[key].resolve = modelInstance => modelInstance[key]
+    if (type === String) typeFields[key].type = GraphQLString
+    if (type === Date) typeFields[key].type = GraphQLString
+    if (type === Boolean) typeFields[key].type = GraphQLBoolean
+    if (type === Number) typeFields[key].type = GraphQLFloat
+  })
+  return typeFields
 }

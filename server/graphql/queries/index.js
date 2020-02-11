@@ -3,16 +3,14 @@ const fs = require('fs')
 const { resolve } = require('path')
 const { Models, ModelTemplates } = require('./../../db/models')
 const types = require('./../types')
-const { getTypesFromMongoModel, generateTypeFields } = require('./../types/utils')
-const { controllerConfigs } = require('./../../controllers')
+const { getTypesFromMongoModel } = require('./../types/utils')
 
 /*
 |--------------------------------------------------------------------------
-| Map Mongoose Queries
+| Generate Generic Queries
 |--------------------------------------------------------------------------
 */
 
-// generate queries based on mongoose queries
 const generatedQueries = {}
 Object.keys(ModelTemplates).map(modelName => {
   const ModelTemplate = ModelTemplates[modelName]
@@ -55,6 +53,12 @@ Object.keys(ModelTemplates).map(modelName => {
   }
 })
 
+/*
+|--------------------------------------------------------------------------
+| Get Queries from directory files
+|--------------------------------------------------------------------------
+*/
+
 let combinedQueries = {}
 fs.readdirSync(__dirname)
   .filter(fileName => fileName !== 'index.js')
@@ -63,21 +67,15 @@ fs.readdirSync(__dirname)
     combinedQueries = { ...combinedQueries, ...customQueries }
 })
 
-const getAllControllerConfigs = {
-  type: GraphQLList(new GraphQLObjectType({
-    name: 'controller_config',
-    fields: () => generateTypeFields({
-      string: ['route', 'method', 'fileName']
-    })
-  })),
-  resolve: () => controllerConfigs,
-}
-
+/*
+|--------------------------------------------------------------------------
+| Combine Queries and Export
+|--------------------------------------------------------------------------
+*/
 
 module.exports = new GraphQLObjectType({
   name: 'Query',
   fields: () => ({ 
-    getAllControllerConfigs,
     ...generatedQueries, 
     ...combinedQueries 
   }),

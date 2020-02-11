@@ -1,6 +1,12 @@
 const { decodeAuthToken } = require('./../utils')
 const { variableNames: { authTokenKey }} = require('./../../constants')
 
+/*
+|--------------------------------------------------------------------------
+| Determine if valid user
+|--------------------------------------------------------------------------
+*/
+
 module.exports.isLoggedIn = function isLoggedIn (req, res, next) {
     try {
         const token = req.headers[authTokenKey]

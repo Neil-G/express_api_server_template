@@ -5,7 +5,7 @@ const { getTypesFromMongoModel } = require('./../types/utils')
 
 /*
 |--------------------------------------------------------------------------
-| Map Mongoose Mutations
+| Generate Generic Mutations
 |--------------------------------------------------------------------------
 */
 
@@ -17,7 +17,7 @@ Object.keys(ModelTemplates).map(modelName => {
 
   // findOneAndUpdate
   genericMutations[`findOne${modelName}AndUpdate`] =  {
-    description: `finds and updates a${modelName}`,
+    description: `finds and updates a ${modelName}`,
     type: Type,
     args: {
       query: {
@@ -53,6 +53,12 @@ Object.keys(ModelTemplates).map(modelName => {
   // deleteMany
 
 })
+
+/*
+|--------------------------------------------------------------------------
+| Combine and Export
+|--------------------------------------------------------------------------
+*/
 
 module.exports = new GraphQLObjectType({
   name: 'Mutation',

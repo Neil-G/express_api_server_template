@@ -1,9 +1,9 @@
-const { GraphQLString } = require('graphql')
 const uuidv1 = require('uuid/v1');
-const { createAuthToken } = require('./../../utils')
-const { variableNames: { authTokenKey }} = require('./../../../constants')
+const { createAuthToken } = require('../../utils')
+const { variableNames: { authTokenKey }} = require('../../../constants')
 
 module.exports =  {
+  modelName: 'User',
   typeName: 'UserType',
   config: {
     firstName:  String,
@@ -19,6 +19,12 @@ module.exports =  {
       type: String,
       resolve: function() {
         return createAuthToken({ user: this })
+      }
+    },
+    fullName: {
+      type: String,
+      resolve: function() {
+        return this.firstName + ' ' + this.lastName
       }
     }
   }
