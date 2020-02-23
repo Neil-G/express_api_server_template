@@ -11,8 +11,10 @@ module.exports =  {
     userName:   { type: String,   unique: true, default: uuidv1() },
     emailAddress:      { type: String,   required: true,   unique: true },
     isEmailAddressVerified:   { type: Boolean, default: false },
-    password:   { type: String,   required: true },   
+    password:   String,   
     isArchived:   { type: Boolean,  default: false }, // soft delete
+    facebookUserId: String,
+    facebookAccessToken: String,
   },
   virtuals: {
     [authTokenKey]: {
