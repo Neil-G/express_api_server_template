@@ -41,10 +41,13 @@ fs.readdirSync(__dirname)
                 return config
             })
         controllerConfigs = [ ...controllerConfigs, ...fileControllerConfigs]
-        fileControllerConfigs.forEach(({ method, route, middleware, controller, outputSchema }) => {
+        fileControllerConfigs.forEach(({ method, route, middleware, controller, outputSchema, overrideResponse }) => {
             configuredControllersRouter[method](route, middleware, async (req, res) => { 
                 try {
-                    const outputData = await controller(req)
+                    if (overrideResponse) {
+                        return await controller(req, res)
+                    }
+                    const outputData = await controller(req, res)
                     const { value, error } = outputSchema.validate(outputData)
                     if (error) throw Error(error)
                     return res.send(value)
