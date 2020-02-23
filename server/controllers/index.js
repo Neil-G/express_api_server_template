@@ -18,10 +18,10 @@ fs.readdirSync(__dirname)
                 config.middlewareString = config.middleware.map(method => method.name).join(', ')
                 // TODO: extract celebration validation formatter method
                 config.celebrateString = ''
-                if (config.celebrate) {
-                    config.middleware.unshift(celebrate(config.celebrate, { allowUnknown: true }))
-                    config.celebrateString = Object.keys(config.celebrate).map(segment => {
-                        const description = config.celebrate[segment].describe()
+                if (config.inputSchema) {
+                    config.middleware.unshift(celebrate(config.inputSchema, { allowUnknown: true }))
+                    config.celebrateString = Object.keys(config.inputSchema).map(segment => {
+                        const description = config.inputSchema[segment].describe()
                         let validationDescriptionArray = [segment.toUpperCase(), description.type]
                         if (description.children) {
                             Object.entries(description.children).forEach(([ key, value ]) => {
@@ -31,11 +31,28 @@ fs.readdirSync(__dirname)
                         return validationDescriptionArray.join(' ')
                     }).join('\n')
                 }
+                if (config.outputSchema) {
+                    config.outputSchemaString = ''
+                    const outputSchema = config.outputSchema.describe()
+                    Object.entries(outputSchema.children).forEach(([ key, { type }]) => {
+                        config.outputSchemaString += `{${key}: ${type}} `
+                    })
+                }
                 return config
             })
         controllerConfigs = [ ...controllerConfigs, ...fileControllerConfigs]
-        fileControllerConfigs.forEach(({ method, route, middleware, controller }) => {
-            configuredControllersRouter[method](route, middleware, controller)
+        fileControllerConfigs.forEach(({ method, route, middleware, controller, outputSchema }) => {
+            configuredControllersRouter[method](route, middleware, async (req, res) => { 
+                try {
+                    const outputData = await controller(req)
+                    const { value, error } = outputSchema.validate(outputData)
+                    if (error) throw Error(error)
+                    return res.send(value)
+                } catch (error) {
+                    console.log(error)
+                    res.status(400).send(error)
+                }
+            })
         })
     })
 

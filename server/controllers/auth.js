@@ -1,6 +1,5 @@
 const { Joi } = require('celebrate')
 const { hashSync, compareSync } = require('bcrypt')
-const jwt = require('jsonwebtoken')
 const { Models: { User }} = require('./../db/models')
 const { variableNames: { authTokenKey }, routes: { 
 	registerAndLoginRoute,
@@ -14,14 +13,13 @@ module.exports = [
 		route: registerAndLoginRoute,
 		method: 'post',
 		description: 'creates a new user with a unique email and password combination',
-		celebrate: {
+		inputSchema: {
 			body: Joi.object({
 				emailAddress: Joi.string().required(),
 				password: Joi.string().required(),
 			})
 		},
-		controller: async (req, res) => {
-			try {
+		controller: async (req) => {
 				let newUserArgs = req.body
 			
 				// encrypt password
@@ -34,26 +32,25 @@ module.exports = [
 				const token = createAuthToken({ user })
 		
 				// return response
-				return res.send({ [authTokenKey]: token })
-			} catch (error) {
-				console.log(error)
-				return res.send(error)
-			}
+				return { [authTokenKey]: token }
+		
 		},
+		outputSchema: Joi.object({
+			[authTokenKey]: Joi.string()
+		}),
 		output: authTokenKey
 	},
 	{
 		route: loginWithEmailAndPassword,
 		method: 'post',
 		description: 'allows user to login with email and password credentials',
-		celebrate: {
+		inputSchema: {
 			body: Joi.object({
 				password: Joi.string().required(),
 				emailAddress: Joi.string().required(),
 			})
 		},
-		controller: async (req, res) => {
-			try {
+		controller: async (req) => {
 				// get user input from login form
 				const { emailAddress, password } = req.body
 			  
@@ -67,38 +64,34 @@ module.exports = [
 				  const token = createAuthToken({ user })
 			  
 				  // return token to client
-				  return res.send({ [authTokenKey]: token })
+				  return { [authTokenKey]: token }
 			  
 				} else {
 			  
 				  // return error, email/pw combination not found
-				  return res.send({ 
-					type: 'incorrectCredentials', 
-					message: 'Email and password were not valid' 
-				  })
+				  return { [authTokenKey]: undefined }
 				}
-			} catch (error) {
-				console.log(error)
-				return res.send(error)
-			}
+			
 		},
+		outputSchema: Joi.object({
+			[authTokenKey]: Joi.string()
+		}),
 		output: authTokenKey
 	},
 	{
 		route: loginWithTokenRoute,
 		method: 'post',
 		description: 'allows user to login with header token',
-		celebrate: {
+		inputSchema: {
 			headers: Joi.object({
 				[authTokenKey]: Joi.string().required(),
 			})
 		},
-		controller: async (req, res) => {
-			try {
+		controller: async (req) => {
 				// get user input from login form
 				const token = req.headers[authTokenKey]
 
-				if (!token) return res.send({ [authTokenKey]: undefined })
+				if (!token) return { [authTokenKey]: undefined }
 			
 				// decode token
 				const decodedToken = decodeAuthToken({ token })
@@ -107,18 +100,17 @@ module.exports = [
 				const user = await User.findById(decodedToken.uid).lean()
 			
 				// no user found with id
-				if (!user) return res.send({ [authTokenKey]: undefined })
+				if (!user) return { [authTokenKey]: undefined }
 			
 				// give client a new refreshed token
 				const refreshedToken = createAuthToken({ user })
 			
-				res.send({ [authTokenKey]: refreshedToken })
+				return { [authTokenKey]: refreshedToken }
 		  
-			} catch(error) {
-				console.log(e)
-				return res.send(e)
-			}
 		  },
+		  outputSchema: Joi.object({
+			[authTokenKey]: Joi.string()
+		}),
 		  output: authTokenKey
 	}
 ]

@@ -7,6 +7,7 @@ const config = require('./config')[process.env.NODE_ENV]
 var cors = require('cors')
 const { resolve } = require('path')
 const chalk = require('chalk')
+const requestLogger = require('./server/utils/requestLogger')
 const { configuredControllersRouter, controllerConfigs } = require('./server/controllers')
 const graphqlHTTP = require('express-graphql')
 const GraphQLSchema = require('./server/graphql')
@@ -25,69 +26,91 @@ const {
     allAppRoutes
 }} = require('./constants')
 
+
+/*
+|--------------------------------------------------------------------------
+| App Configuration
+|--------------------------------------------------------------------------
+*/
+
 const PORT = 5678
 
-// static folder
-app.use(express.static('public'))
-app.use(express.static('./client/build'))
+const appConfiguration = [
+  express.static('public'),
+  express.static('./client/build'),
+  bodyParser.json(),
+  bodyParser.urlencoded({ extended: false }),
+  cookieParser(),
+  requestLogger,
+  cors(),
+]
 
-// template engine
+const appSettings = {
+  'view engine': 'handlebars',
+  'json spaces': 2,
+}
+
+appConfiguration.forEach(setting => app.use(setting))
+Object.entries(appSettings).forEach(([key, value]) => app.set(key, value))
 app.engine('handlebars', exphbs());
-app.set('view engine', 'handlebars');
 
-// format request info
-app.set('json spaces', 2)
-app.use(bodyParser.json());
-app.use(bodyParser.urlencoded({ extended: false }));
-app.use(cookieParser());
+/*
+|--------------------------------------------------------------------------
+| Static Page Routes
+|--------------------------------------------------------------------------
+*/
 
-// cors
-app.use(cors())
+const staticPageConfigs = [
+  {
+    route: '/',
+    view: 'home',
+    args: {
+      authTokenKey,
+      registerAndLoginRoute,
+      loginWithTokenRoute,
+      loginWithEmailAndPassword,
+      appUrl: config.appRootUrl 
+    }
+  },
+  {
+    route: '/api-docs',
+    view: 'api_docs',
+    args: {
+      controllerConfigs
+    }
+  }
+]
 
-// logging
-app.use((req, _, next) => {
-  if (req.path.includes('api')) {
-    console.log(chalk.magenta(`${req.method} ${req.path}`))
-    return next()
-  }
-  if (req.path.includes('graphql')) {
-    console.log(chalk.green(`${req.method} ${req.path}`))
-    return next()
-  }
-  if (req.path.includes('.css') || req.path.includes('.ico')) {
-    console.log(chalk.blueBright(`${req.method} ${req.path}`))
-    return next()
-  }
-  console.log(chalk.yellow(`${req.method} ${req.path}`))
-  next()
+staticPageConfigs.forEach(({ route, view, args }) => {
+  app.get(route, (_, res) => {
+    res.render(view, args)
+  })
 })
 
-// public pages
-app.get('/', (_, res) => {
-  res.render('home', {
-    authTokenKey,
-    registerAndLoginRoute,
-    loginWithTokenRoute,
-    loginWithEmailAndPassword,
-    appUrl: config.appRootUrl 
-  });
-});
+/*
+|--------------------------------------------------------------------------
+| React Application
+|--------------------------------------------------------------------------
+*/
 
-app.get('/api-docs', (_, res) => {
-  res.render('api_docs', {
-    controllerConfigs,
-  });
-});
-
-// React application
 app.get(allAppRoutes, (_, res) => {
   res.sendFile(resolve(`./client/build/_index.html`))
 })
 
-// configured controllers
+/*
+|--------------------------------------------------------------------------
+| API Endpoints
+|--------------------------------------------------------------------------
+*/
+
 app.use('/', configuredControllersRouter)
 
-// graphql endpoint
+/*
+|--------------------------------------------------------------------------
+| GraphQL
+|--------------------------------------------------------------------------
+*/
+
 app.use(graphQLRoute, isLoggedIn, graphqlHTTP({
   schema: GraphQLSchema,
   pretty: true
@@ -101,13 +124,24 @@ if (process.env.NODE_ENV !== 'production') {
   }))
 }
 
+/*
+|--------------------------------------------------------------------------
+| 404 & errors
+|--------------------------------------------------------------------------
+*/
+
 // 404 page
 app.use('*', (_, res) => res.send('404'))
 
 // handle errors
 app.use(errors());
 
-// start up server
+/*
+|--------------------------------------------------------------------------
+| Start Server
+|--------------------------------------------------------------------------
+*/
+
 app.listen(PORT, () => {
   console.log(`Example app listening on port ${PORT}!`)
 })
