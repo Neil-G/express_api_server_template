@@ -84,6 +84,20 @@ button.close-auth-modal-button {
     float: right;
 }
 
+button.centered {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+i.space-right {
+    margin-right: 6px;
+}
+
+i.space-left {
+    margin-left: 6px;
+}
+
 .open-modal-link {
     cursor: pointer;
 }
