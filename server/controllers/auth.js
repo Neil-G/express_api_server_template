@@ -166,10 +166,54 @@ module.exports = [
 					return await res.send({ [authTokenKey]: token })
 				}
 			  })
-			  return await { success: 'ok' }
 		},
 		outputSchema: Joi.object({
-			success: Joi.string()
+			authTokenKey: Joi.string()
+		}),
+		overrideResponse: true,
+	},
+	{
+		route: '/api/social-auth/google-login',
+		method: 'post',
+		description: 'login or register with google',
+		inputSchema: {
+			body: Joi.object({
+				googleUserId: Joi.string().required(),
+				emailAddress: Joi.string().required(),
+				firstName: Joi.string().required(),
+				lastName: Joi.string().required(),
+			})
+		},
+		controller: async (req, res) => {
+			const { googleUserId, emailAddress, firstName, lastName } = req.body
+			const user = await User.findOne({ emailAddress }).lean()
+			// Create a user that doesn't exist
+			if (!user) {
+				const newUser = await User.create({
+					firstName: firstName,
+					lastName: lastName,
+					emailAddress,
+					isEmailAddressVerified: true,
+					googleUserId,
+				})
+				const token = await createAuthToken({ user: newUser })
+				return await res.send({ [authTokenKey]: token })
+			// Update existing user
+			} else {
+				await User.findByIdAndUpdate(user._id, {
+					$set: {
+						firstName: user.firstName || firstName,
+						lastName: user.lastName || lastName,
+						isEmailAddressVerified: true,
+						googleUserId,
+					}
+				})
+				const token = await createAuthToken({ user })
+				return await res.send({ [authTokenKey]: token })
+			}
+		},
+		outputSchema: Joi.object({
+			[authTokenKey]: Joi.string()
 		}),
 		overrideResponse: true,
 	}
