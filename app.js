@@ -1,17 +1,17 @@
+require('dotenv').config()
 const express = require('express')
 const app = express()
-var exphbs  = require('express-handlebars');
+var exphbs  = require('express-handlebars')
 const bodyParser = require('body-parser')
 const cookieParser = require('cookie-parser')
 const config = require('./config')[process.env.NODE_ENV]
 var cors = require('cors')
 const { resolve } = require('path')
-const chalk = require('chalk')
 const requestLogger = require('./server/utils/requestLogger')
 const { configuredControllersRouter, controllerConfigs } = require('./server/controllers')
 const graphqlHTTP = require('express-graphql')
 const GraphQLSchema = require('./server/graphql')
-const { errors } = require('celebrate');
+const { errors } = require('celebrate')
 const { isLoggedIn } = require('./server/middleware/auth')
 const { 
   variableNames: { 
