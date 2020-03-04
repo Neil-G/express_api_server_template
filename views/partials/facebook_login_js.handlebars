@@ -1,0 +1,57 @@
+<script>
+  window.fbAsyncInit = function() {
+    FB.init({
+      appId      : '1397238603644248',
+      cookie     : true,
+      xfbml      : true,
+      version    : 'v6.0'
+    });
+  }
+</script>
+
+<script async defer src="https://connect.facebook.net/en_US/sdk.js"></script>
+
+<script>
+  var isLoginInProgress = false
+  function loginToFacebook(buttonId) { 
+        if (isLoginInProgress) return
+        isLoginInProgress = true
+        var facebookLoginButton = document.getElementById(buttonId)
+        facebookLoginButton.innerHTML = '<i class="fas fa-spinner fa-spin fa-2x space-right"></i>Logging in with Facebook'
+        facebookLoginButton.classList.add('in-progress')
+        FB.login(function(response) {
+            if (response.authResponse) {
+                axios({
+                    method: 'post',
+                    url: '/api/social-auth/facebook-login',
+                    data: {
+                        facebookUserId: response.authResponse.userID,
+                        accessToken: response.authResponse.accessToken
+                    }
+                }).then(res => {
+                    facebookLoginButton.classList.remove('in-progress')
+                    isLoginInProgress = true
+                    var authTokenKey = "{{authTokenKey}}"
+                    var authToken = res.data[authTokenKey]
+                    if (authToken) {
+                        facebookLoginButton.innerHTML = '<i class="fab fa-facebook-f fa-lg space-right"></i>Login successful!'
+                        // add token to local storage
+                        localStorage.setItem(authTokenKey, authToken)
+
+                        // redirect to application
+                        setTimeout(function() {
+                            return window.location.href = "{{appUrl}}" + '?'  + authTokenKey + '=' + authToken
+                        }, 450)
+                    }
+                })
+                
+            } else {
+                // user hit cancel button
+                console.log('User cancelled login or did not fully authorize.');
+            }
+        }, {
+            scope: 'public_profile,email'
+        })
+  }
+
+</script>

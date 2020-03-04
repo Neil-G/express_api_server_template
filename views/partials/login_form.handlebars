@@ -1,11 +1,28 @@
 <form id="loginForm" >
     <div class="auth-form">
-        <h2>Login</h2>
-        <label>Email</label>
-        <input id="loginEmailInput" type="email" placeholder="email">
-        <label>Password</label>
-        <input id="loginPasswordInput" type="password" placeholder="verify password">
-        <button type="submit">Submit</button>
+        <div class="input-with-icon-container">
+            <div class="icon-container">
+                <i class="fas fa-envelope"></i>
+            </div>
+            <input  id="loginEmailInput" type="email" placeholder="Email" class="u-full-width">
+        </div>
+        <div class="input-with-icon-container" id='login-password-input-container'>
+            <div class="icon-container">
+                <i class="fas fa-key"></i>
+            </div>
+            <input id="loginPasswordInput" type="password" placeholder="Password" class="u-full-width">
+        </div>
+
+        {{!-- Login Form Submit Button --}}
+        <button id='login-submit' type="submit" class="primary">LOGIN</button>
+        
+        {{!-- Switch to sign up button --}}
+        <div>New here? <span class="toggle-auth-modal" onclick="openAuthModal('register')">Sign up</span></div>
+
+        <hr class="social-auth-rule" />
+        <div class="social-auth-or-divider"><div class='or-container'>OR</div></div>
+        <button id="login-type-toggle" class="centered with-left-icon" type="button" onclick="toggleLoginType();"><i class="fas fa-paper-plane space-right"></i>Login by email link</button>
+        {{> facebook_login_button button_id='facebook-login-button'}}
     </div>
 </form>
 
@@ -13,39 +30,69 @@
     // attach onsubmit to form
     var loginForm = document.getElementById("loginForm")
     loginForm.addEventListener('submit', submitLoginForm)
+    
+    var numberRejectedPasswordAttempts = 0
+    var loginType = 'emailAndPassword'
 
     function submitLoginForm (e) {
         e.preventDefault()
+        configureToastr('top-full')
         var email = document.getElementById("loginEmailInput").value
         var password = document.getElementById("loginPasswordInput").value
 
         // validation
+        if (!email.trim()) return toastr.error('Please enter your email')
+        if (!password.trim()) return toastr.error('Please enter your password')
 
         // submit data to server
-        axios({
-            method: 'post',
-            url: "{{loginWithEmailAndPassword}}",
-            data: {
-                emailAddress: email,
-                password: password
-            }
-        // handle server response
-        }).then(res => {
-            // TODO: handle incorrect credentials error
-            if (res.data.type === 'incorrectCredentials')
-                return alert(res.data.message)
+        if (loginType === 'emailAndPassword') {
+            axios({
+                method: 'post',
+                url: "{{loginWithEmailAndPassword}}",
+                data: {
+                    emailAddress: email,
+                    password: password
+                }
+            // handle server response
+            }).then(res => {
+                var authTokenKey = "{{authTokenKey}}"
+                var authToken = res.data[authTokenKey]
+                if (authToken) {
+                    // add token to local storage
+                    localStorage.setItem(authTokenKey, authToken)
 
-            var authTokenKey = "{{authTokenKey}}"
-            var authToken = res.data[authTokenKey]
-            if (authToken) {
-                // add token to local storage
-                localStorage.setItem(authTokenKey, authToken)
+                    // redirect to application
+                    setTimeout(function() {
+                        return window.location.href = "{{appUrl}}" + '?'  + authTokenKey + '=' + authToken
+                    }, 450)
+                } else {
+                    numberRejectedPasswordAttempts = numberRejectedPasswordAttempts+1
+                    if (numberRejectedPasswordAttempts > 2 && numberRejectedPasswordAttempts%3 === 0) {
+                        toastr.info('If you have forgotten your password, please sign in by email link. If you have forgotten your email address, log in with your social media account.', 'Having trouble logging in?')
+                    } else {
+                        toastr.error('Email and password were incorrect')
+                    }
+                }
+            })
+        } else if (loginType === 'emailLink') {
+            // TODO: handle sending email link
+        }
+    }
+    function toggleLoginType() {
+        var loginTypeToggle = document.getElementById('login-type-toggle')
+        var loginSubmit = document.getElementById('login-submit')
+        var passwordInputContainer = document.getElementById('login-password-input-container')
+        if (loginType === 'emailAndPassword') {
+            loginType = 'emailLink'
+            loginTypeToggle.innerHTML = '<i class="fas fa-unlock space-right"></i>Login with email and password'
+            loginSubmit.innerHTML = 'Send a link to my email'
+            passwordInputContainer.style.display = 'none'
+        } else if (loginType === 'emailLink') {
+            loginType = 'emailAndPassword'
+            loginTypeToggle.innerHTML = '<i class="fas fa-paper-plane space-right"></i>Login by email link'
+            loginSubmit.innerHTML = 'Login'
+            passwordInputContainer.style.display = 'flex'
 
-                // redirect to application
-                setTimeout(function() {
-                    return window.location.href = "{{appUrl}}" + '?'  + authTokenKey + '=' + authToken
-                }, 450)
-            }
-        })
+        }
     }
 </script>

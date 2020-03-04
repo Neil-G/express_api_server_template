@@ -1,13 +1,21 @@
 <form id="registrationForm">
     <div class="auth-form">
-        <h2>Register</h2>
         <label>Email</label>
         <input id="emailInput" type="email" placeholder="email">
         <input id="emailVerifyInput" type="email" placeholder="verify email">
         <label>Password</label>
         <input id="passwordInput" type="password" placeholder="password">
         <input id="passwordVerifyInput" type="password" placeholder="verify password">
-        <button type="submit">Submit</button>
+        
+        {{!-- Registration Form Submit Button --}}
+        <button type="submit" class="primary">SIGN UP</button>
+
+        {{!-- Switch to sign up button --}}
+        <div>Already a member? <span class="toggle-auth-modal" onclick="openAuthModal('login')">Login</span></div>
+
+        <hr class="social-auth-rule" />
+        <div class="social-auth-or-divider"><div class='or-container'>OR</div></div>
+        {{> facebook_login_button button_id='facebook-registration-button'}}
     </div>
 </form>
 
@@ -28,10 +36,11 @@
         // validation
 
         // make sure all fields are filled out
-        if (!email.trim()) return alert ('please enter an email')
-        if (!emailVerify.trim()) return alert ('please enter the email verification')
-        if (!password.trim()) return alert ('please enter a password')
-        if (!passwordVerify.trim()) return alert ('please enter the password verification')
+        configureToastr('top-full')
+        if (!email.trim()) return toastr.error('Please enter an email')
+        if (!emailVerify.trim()) return toastr.error('Please enter the email again for verification')
+        if (!password.trim()) return toastr.error('Please enter a password')
+        if (!passwordVerify.trim()) return toastr.error('Please enter the password verification')
 
         // verify that fields match with verification fields
         if (email.trim() !== emailVerify.trim()) return alert('emails do not match')
@@ -49,12 +58,6 @@
             }
         // handle server response
         }).then(res => {
-            // handle db duplicate errors
-            if (!!res.data.errmsg && res.data.errmsg.includes('duplicate key error')) {
-                if (res.data.errmsg.includes('emailAddress')) {
-                    return alert(email + ' is already registered. Please login.')
-                }
-            }
 
             // add token to local storage
             var authTokenKey = "{{authTokenKey}}"
@@ -66,6 +69,16 @@
                 return window.location.href = "{{appUrl}}" + '?'  + authTokenKey + '=' + authToken
             }, 450)
 
+        })
+        .catch(error => {
+            if (error.response.data.code === 11000 && error.response.data.errmsg.includes('emailAddress')) {
+                    configureToastr('top-full')
+                    toastr.error('Please login', email + ' is already registered')
+                    openAuthModal('login')
+                    var loginEmailInput = document.getElementById("loginEmailInput")
+                    loginEmailInput.value = email
+
+            }
         })
     }
 </script>
