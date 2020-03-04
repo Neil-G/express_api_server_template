@@ -379,10 +379,10 @@
   /* Misc
   â€“â€“â€“â€“â€“â€“â€“â€“â€“â€“â€“â€“â€“â€“â€“â€“â€“â€“â€“â€“â€“â€“â€“â€“â€“â€“â€“â€“â€“â€“â€“â€“â€“â€“â€“â€“â€“â€“â€“â€“â€“â€“â€“â€“â€“â€“â€“â€“â€“â€“ */
   hr {
-    margin-top: 3rem;
-    margin-bottom: 3.5rem;
-    border-width: 0;
-    border-top: 1px solid #E1E1E1; }
+    margin-top: 1rem;
+    margin-bottom: 1.5rem;
+    width: 100%;
+    border-top: 1px solid #999; }
   
   
   /* Clearing
