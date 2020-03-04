@@ -1,7 +1,10 @@
 <div id="auth-modal" class="modal-container" hidden>
     <div id="auth-modal-background" class="modal-background">
         <div class="modal">
-            <button onclick="closeAuthModal()" class="close-auth-modal-button">close</button>
+            <div class="auth-modal-header-container ">
+                <h4 id="auth-modal-header"></h4>
+                <i class="fal fa-times fa-lg close-auth-modal" onclick="closeAuthModal();"></i>
+            </div>
             {{> registration_form}}
             {{> login_form}}
         </div>

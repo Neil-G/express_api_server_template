@@ -1,0 +1,63 @@
+<script src="https://apis.google.com/js/api:client.js"></script>
+<script>
+    var googleUser = {};
+    var startApp = function() {
+        gapi.load('auth2', function() {
+            // Retrieve the singleton for the GoogleAuth library and set up the client.
+            auth2 = gapi.auth2.init({
+            client_id: '772159884636-ui46ngv57te2vu3qcnp5c12nt7eo6thd.apps.googleusercontent.com',
+            cookiepolicy: 'single_host_origin',
+            });
+
+            auth2.attachClickHandler(
+                document.getElementById('google-login-button'), 
+                {},
+                loginWithGoogle, 
+                function(error) { 
+                    console.log(JSON.stringify(error, undefined, 2)) 
+                }
+            );
+
+            auth2.attachClickHandler(
+                document.getElementById('google-registration-button'), 
+                {},
+                loginWithGoogle, 
+                function(error) { 
+                    console.log(JSON.stringify(error, undefined, 2))
+                }
+            );
+        });
+    };
+
+    function loginWithGoogle (googleUser) {
+        axios({
+            method: 'post',
+            url: '/api/social-auth/google-login',
+            data: {
+                googleUserId: googleUser.getBasicProfile().getId(),
+                firstName: googleUser.getBasicProfile().getGivenName(),
+                lastName: googleUser.getBasicProfile().getFamilyName(),
+                emailAddress: googleUser.getBasicProfile().getEmail(),
+            }
+        }).then(res => {
+            // isLoginInProgress = true
+            var authTokenKey = "{{authTokenKey}}"
+            var authToken = res.data[authTokenKey]
+            // facebookLoginButton.classList.remove('in-progress')
+            // isLoginInProgress = true
+            var authTokenKey = "{{authTokenKey}}"
+            var authToken = res.data[authTokenKey]
+            if (authToken) {
+                // facebookLoginButton.innerHTML = '<i class="fab fa-facebook-f fa-lg space-right"></i>Login successful!'
+                // add token to local storage
+                localStorage.setItem(authTokenKey, authToken)
+
+                // redirect to application
+                setTimeout(function() {
+                    return window.location.href = "{{appUrl}}" + '?'  + authTokenKey + '=' + authToken
+                }, 450)
+            }
+        })
+    }
+    startApp()
+</script>
