@@ -1,4 +1,5 @@
 const { Joi } = require('celebrate')
+var FB = require('fb')
 const { hashSync, compareSync } = require('bcrypt')
 const { Models: { User }} = require('./../db/models')
 const { variableNames: { authTokenKey }, routes: { 
@@ -8,6 +9,11 @@ const { variableNames: { authTokenKey }, routes: {
 }} = require('../../constants')
 const { createAuthToken, decodeAuthToken } = require('./../utils')
   
+FB.options({
+    appId:          '1397238603644248',
+	appSecret: 		process.env.FB_APP_SECRET
+})
+
 module.exports = [
     {
 		route: registerAndLoginRoute,
@@ -58,7 +64,7 @@ module.exports = [
 				const user = await User.findOne({ emailAddress }).lean()
 			  
 				// check user credentials
-				if (!!user && compareSync(password, user.password)) {
+				if (!!user && !!user.password && compareSync(password, user.password)) {
 			  
 				  // create json web token to maintain session on client
 				  const token = createAuthToken({ user })
@@ -110,7 +116,61 @@ module.exports = [
 		  },
 		  outputSchema: Joi.object({
 			[authTokenKey]: Joi.string()
-		}),
+		  }),
 		  output: authTokenKey
+	},
+	{
+		route: '/api/social-auth/facebook-login',
+		method: 'post',
+		description: 'login or register with facebook',
+		inputSchema: {
+			body: Joi.object({
+				facebookUserId: Joi.string().required(),
+				accessToken: Joi.string().required(),
+			})
+		},
+		controller: async (req, res) => {
+			const { facebookUserId, accessToken } = req.body
+			FB.setAccessToken(accessToken)
+			await FB.api(facebookUserId, { fields: ['id', 'first_name', 'last_name', 'email'] }, async (response) => {
+				if(!response || response.error) {
+				 console.log(!response ? 'error occurred' : response.error);
+				 return;
+				}
+				const { email, first_name, last_name } = response
+				const user = await User.findOne({ emailAddress: email }).lean()
+				// Create a user that doesn't exist
+				if (!user) {
+					const newUser = await User.create({
+						firstName: first_name,
+						lastName: last_name,
+						emailAddress: email,
+						isEmailAddressVerified: true,
+						facebookUserId,
+						facebookAccessToken: accessToken
+					})
+					const token = await createAuthToken({ user: newUser })
+					return await res.send({ [authTokenKey]: token })
+				// Update existing user
+				} else {
+					await User.findByIdAndUpdate(user._id, {
+						$set: {
+							firstName: user.firstName || first_name,
+							lastName: user.lastName || last_name,
+							isEmailAddressVerified: true,
+							facebookUserId,
+							facebookAccessToken: accessToken
+						}
+					})
+					const token = await createAuthToken({ user })
+					return await res.send({ [authTokenKey]: token })
+				}
+			  })
+			  return await { success: 'ok' }
+		},
+		outputSchema: Joi.object({
+			success: Joi.string()
+		}),
+		overrideResponse: true,
 	}
 ]
