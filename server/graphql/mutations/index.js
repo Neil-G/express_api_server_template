@@ -1,4 +1,4 @@
-const { GraphQLObjectType, GraphQLInputObjectType } = require ('graphql')
+const { GraphQLObjectType, GraphQLInputObjectType, GraphQLString } = require ('graphql')
 const { Models, ModelTemplates } = require('./../../db/models')
 const types = require('./../types')
 const { getTypesFromMongoModel } = require('./../types/utils')
@@ -14,9 +14,11 @@ Object.keys(ModelTemplates).map(modelName => {
   const ModelTemplate = ModelTemplates[modelName]
   const Type = types[ModelTemplate.typeName]
   const Model = Models[modelName]
+  let mutationName
 
   // findOneAndUpdate
-  genericMutations[`findOne${modelName}AndUpdate`] =  {
+  mutationName = `findOne${modelName}AndUpdate`
+  genericMutations[mutationName] =  {
     description: `finds and updates a ${modelName}`,
     type: Type,
     args: {
@@ -43,6 +45,27 @@ Object.keys(ModelTemplates).map(modelName => {
   }
 
   // findByIdAndUpdate
+  mutationName = `find${modelName}ByIdAndUpdate`
+  genericMutations[mutationName] =  {
+    description: `finds and updates a ${modelName}`,
+    type: Type,
+    args: {
+      userId: { name: 'user_id', type: GraphQLString },
+      updates: {
+        type: new GraphQLInputObjectType({
+          name: `${mutationName}_updates`,
+          fields: () => getTypesFromMongoModel(ModelTemplate.config)
+        })
+      }
+    },
+    resolve: async (_, { userId, updates }) => {
+      return await Model.findByIdAndUpdate(
+        userId, 
+        { $set: updates },
+        { new: true }
+      )
+    }
+  }
 
   // updateMany
 
