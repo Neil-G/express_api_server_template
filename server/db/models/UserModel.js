@@ -15,6 +15,8 @@ module.exports =  {
     isArchived:   { type: Boolean,  default: false }, // soft delete
     facebookUserId: String,
     facebookAccessToken: String,
+    googleUserId: String,
+
   },
   virtuals: {
     [authTokenKey]: {
@@ -28,6 +30,18 @@ module.exports =  {
       resolve: function() {
         return this.firstName + ' ' + this.lastName
       }
-    }
-  }
+    },
+    isFacebookAccountConnected: {
+      type: Boolean,
+      resolve: function() {
+        return !!this.facebookUserId
+      }
+    },
+    isGoogleAccountConnected: {
+      type: Boolean,
+      resolve: function() {
+        return !!this.googleUserId
+      }
+    },
+  },
 }
