@@ -157,6 +157,27 @@ button.google.in-progress {
     cursor: default;
 }
 
+button.github {
+    background: #333;
+    border: none;
+    color: white;
+    width: 100%;
+}
+
+button.github:hover {
+    background: #111;
+}
+
+button.github.in-progress {
+    background: #111;
+    cursor: default;
+}
+
+a.github-login-link {
+    text-decoration: none;
+    width: 100%;
+}
+
 /* Icons */
 i.space-right {
     margin-right: 6px;

@@ -1,4 +1,7 @@
 const { Joi } = require('celebrate')
+const axios = require('axios')
+var github = require('octonode');
+const querystring = require('querystring')
 var FB = require('fb')
 const { hashSync, compareSync } = require('bcrypt')
 const { Models: { User }} = require('./../db/models')
@@ -178,6 +181,8 @@ module.exports = [
 		description: 'login or register with google',
 		inputSchema: {
 			body: Joi.object({
+
+
 				googleUserId: Joi.string().required(),
 				emailAddress: Joi.string().required(),
 				firstName: Joi.string().required(),
@@ -190,8 +195,8 @@ module.exports = [
 			// Create a user that doesn't exist
 			if (!user) {
 				const newUser = await User.create({
-					firstName: firstName,
-					lastName: lastName,
+					firstName,
+					lastName,
 					emailAddress,
 					isEmailAddressVerified: true,
 					googleUserId,
@@ -216,5 +221,109 @@ module.exports = [
 			[authTokenKey]: Joi.string()
 		}),
 		overrideResponse: true,
-	}
+	},
+	{
+		route: '/api/social-auth/github_auth_redirect',
+		method: 'get',
+		description: 'handle github auth redirect',
+		inputSchema: {
+			query: Joi.object({
+				code: Joi.string(),
+			})
+		},
+		controller: async (req, res) => {
+			const { code } = req.query
+			axios({
+				method: 'post',
+				url: `https://github.com/login/oauth/access_token`,
+				data: {
+					client_id: '93e1a698aee8637fc133',
+					client_secret: '83f696ea968677ee0ebdc3f341b6ba8e6021ea5b',
+					code,
+				}
+			}).then(async response => {
+				const { access_token } = querystring.parse(response.data)
+				 const client = github.client(access_token)
+				 await client.get('/user', {}, async function (err, status, body, headers) {
+					 console.log('body', body)
+					const { id, name, email } = body
+					const [firstName, lastName] = name.split(' ')
+					// If email returned
+					if (email) {
+						const user = await User.findOne({ emailAddress: email }).lean()
+						if (!user) {
+							const newUser = await User.create({
+								firstName,
+								lastName,
+								emailAddress: email,
+								isEmailAddressVerified: true,
+								githubUserId: id,
+							})
+							const token = await createAuthToken({ user: newUser })
+							return await res.redirect(`/?${authTokenKey}=${token}`)
+						} else {
+							await User.findByIdAndUpdate(user._id, {
+								$set: {
+									firstName: user.firstName || firstName,
+									lastName: user.lastName || lastName,
+									isEmailAddressVerified: true,
+									githubUserId: id,
+								}
+							})
+							const token = await createAuthToken({ user })
+							return await res.redirect(`/?${authTokenKey}=${token}`)
+						}
+
+					} else { // Handle github auth by id
+						const user = await User.findOne({ githubUserId: id }).lean()
+						if (!user) {
+							const newUser = await User.create({
+								firstName,
+								lastName,
+								githubUserId: id,
+							})
+							const token = await createAuthToken({ user: newUser })
+							return await res.redirect(`/?${authTokenKey}=${token}`)
+
+						} else {
+							await User.findByIdAndUpdate(user._id, {
+								$set: {
+									firstName: user.firstName || firstName,
+									lastName: user.lastName || lastName,
+									githubUserId: id,
+								}
+							})
+							const token = await createAuthToken({ user })
+							return await res.redirect(`/?${authTokenKey}=${token}`)
+						}
+					}
+				});
+
+			})
+
+		},
+		outputSchema: Joi.object({
+			[authTokenKey]: Joi.string()
+		}),
+		overrideResponse: true,
+	},
+	{
+		route: '/api/social-auth/linkedin_auth_redirect',
+		method: 'get',
+		description: 'handle linkedin auth redirect',
+		// inputSchema: {
+		// 	query: Joi.object({
+		// 		code: Joi.string(),
+		// 	})
+		// },
+		controller: async (req, res) => {
+			
+			console.log('req', req.query)
+		},
+		outputSchema: Joi.object({
+			[authTokenKey]: Joi.string()
+		}),
+		overrideResponse: true,
+	},
+
 ]

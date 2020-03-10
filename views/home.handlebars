@@ -64,3 +64,26 @@
     })
 
 </script>
+
+<script>
+    function getUrlParam (key) {
+        var urlParams = new URLSearchParams(window.location.search)
+        var paramValue = urlParams.get(key)
+        return paramValue
+    }
+
+    // GITHUB LOGIN LOGIC
+    var authToken = getUrlParam("{{authTokenKey}}")
+    if (authToken) {
+        // add token to local storage
+        localStorage.setItem(authTokenKey, authToken)
+        // redirect to application
+        setTimeout(function() {
+            return window.location.href = "{{appUrl}}" + '?'  + authTokenKey + '=' + authToken
+        }, 450)
+    }
+</script>
+
+
+<button>Login with LinkedIn</button>
+<a href="https://www.linkedin.com/oauth/v2/authorization?response_type=code&client_id=779y7imgok34es&redirect_uri=http%3A%2F%2Flocalhost%3A5678%2Fapi%2Fsocial-auth%2Flinkedin_auth_redirect&state=fooobar&scope=r_liteprofile%20r_emailaddress%20w_member_social">Login with Linked</a>

@@ -9,13 +9,15 @@ module.exports =  {
     firstName:  String,
     lastName:   String,
     userName:   { type: String,   unique: true, default: uuidv1() },
-    emailAddress:      { type: String,   required: true,   unique: true },
+    emailAddress:      { type: String,  unique: true },
     isEmailAddressVerified:   { type: Boolean, default: false },
     password:   String,   
     isArchived:   { type: Boolean,  default: false }, // soft delete
     facebookUserId: String,
     facebookAccessToken: String,
     googleUserId: String,
+    githubUserId: String,
+    githubAccessToken: String,
 
   },
   virtuals: {
@@ -41,6 +43,12 @@ module.exports =  {
       type: Boolean,
       resolve: function() {
         return !!this.googleUserId
+      }
+    },
+    isGithubAccountConnected: {
+      type: Boolean,
+      resolve: function() {
+        return !!this.githubUserId
       }
     },
   },

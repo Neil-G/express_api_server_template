@@ -25,7 +25,7 @@ fs.readdirSync(__dirname)
                         let validationDescriptionArray = [segment.toUpperCase(), description.type]
                         if (description.children) {
                             Object.entries(description.children).forEach(([ key, value ]) => {
-                                validationDescriptionArray.push(`{${key}: ${value.type} (${Object.values(value.flags).join(', ')})}`)
+                                validationDescriptionArray.push(`{${key}: ${value.type}}`)
                             })
                         }
                         return validationDescriptionArray.join(' ')
