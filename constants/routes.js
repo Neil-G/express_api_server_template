@@ -12,6 +12,17 @@ const registerAndLoginRoute = [apiAuthRoutesRoot, 'register-and-login'].join('/'
 const loginWithTokenRoute = [apiAuthRoutesRoot, 'login-with-token'].join('/')
 const loginWithEmailAndPassword = [apiAuthRoutesRoot, 'login-with-email-and-password'].join('/')
 
+const socialAuthRoot = [apiAuthRoutesRoot, 'social'].join('/')
+
+/*
+|--------------------------------------------------------------------------
+| Social Auth
+|--------------------------------------------------------------------------
+*/
+
+const FACEBOOK_LOGIN_CALLBACK_URI = [socialAuthRoot, 'facebook', 'login'].join('/')
+
+
 module.exports = {
     graphQLRoute,
     graphiQLRoute,
@@ -21,4 +32,5 @@ module.exports = {
     loginWithEmailAndPassword,
     appLoginRootRoute,
     allAppRoutes,
+    FACEBOOK_LOGIN_CALLBACK_URI,
 }

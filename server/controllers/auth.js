@@ -1,21 +1,17 @@
 const { Joi } = require('celebrate')
+const config = require('./../../config')[process.env.NODE_ENV]
 const axios = require('axios')
-var github = require('octonode');
 const querystring = require('querystring')
-var FB = require('fb')
+var github = require('octonode')
 const { hashSync, compareSync } = require('bcrypt')
 const { Models: { User }} = require('./../db/models')
 const { variableNames: { authTokenKey }, routes: { 
 	registerAndLoginRoute,
 	loginWithTokenRoute, 
 	loginWithEmailAndPassword,
+	FACEBOOK_LOGIN_CALLBACK_URI
 }} = require('../../constants')
 const { createAuthToken, decodeAuthToken } = require('./../utils')
-  
-FB.options({
-    appId:          '1397238603644248',
-	appSecret: 		process.env.FB_APP_SECRET
-})
 
 module.exports = [
     {
@@ -123,52 +119,58 @@ module.exports = [
 		  output: authTokenKey
 	},
 	{
-		route: '/api/social-auth/facebook-login',
-		method: 'post',
+		route: FACEBOOK_LOGIN_CALLBACK_URI,
+		method: 'get',
 		description: 'login or register with facebook',
 		inputSchema: {
-			body: Joi.object({
-				facebookUserId: Joi.string().required(),
-				accessToken: Joi.string().required(),
+			query: Joi.object({
+				code: Joi.string().required(),
 			})
 		},
-		controller: async (req, res) => {
-			const { facebookUserId, accessToken } = req.body
-			FB.setAccessToken(accessToken)
-			await FB.api(facebookUserId, { fields: ['id', 'first_name', 'last_name', 'email'] }, async (response) => {
-				if(!response || response.error) {
-				 console.log(!response ? 'error occurred' : response.error);
-				 return;
-				}
-				const { email, first_name, last_name } = response
-				const user = await User.findOne({ emailAddress: email }).lean()
-				// Create a user that doesn't exist
-				if (!user) {
-					const newUser = await User.create({
-						firstName: first_name,
-						lastName: last_name,
-						emailAddress: email,
-						isEmailAddressVerified: true,
-						facebookUserId,
-						facebookAccessToken: accessToken
-					})
-					const token = await createAuthToken({ user: newUser })
-					return await res.send({ [authTokenKey]: token })
-				// Update existing user
-				} else {
-					await User.findByIdAndUpdate(user._id, {
-						$set: {
-							firstName: user.firstName || first_name,
-							lastName: user.lastName || last_name,
-							isEmailAddressVerified: true,
-							facebookUserId,
-							facebookAccessToken: accessToken
-						}
-					})
+		controller: async (req, response) => {
+			const { code } = req.query
+			await axios({
+				url: 'https://graph.facebook.com/v6.0/oauth/access_token?' + querystring.stringify({ 
+					client_id: process.env.FB_APP_ID,
+					client_secret: process.env.FB_APP_SECRET,
+					redirect_uri: config.baseUrl + FACEBOOK_LOGIN_CALLBACK_URI,
+					code,
+				})
+			}).then(res => {
+				const { access_token, expires_in } = res.data
+				this.access_token = access_token
+				return axios({
+					url: 'https://graph.facebook.com/debug_token?' + querystring.stringify({
+						input_token: access_token,
+						access_token
+						})
+				})
+
+			}).then(async res => {
+				const { data: { data: { user_id }} } = res
+				// Find user with this facebook user id
+				const user = await User.findOne({ facebookUserId: user_id })
+				if (!!user) {
 					const token = await createAuthToken({ user })
-					return await res.send({ [authTokenKey]: token })
+					return response.redirect(`/?${authTokenKey}=${token}`)
 				}
-			  })
+				// If no user found, get the email of the user
+				return axios({
+					url: `https://graph.facebook.com/${user_id}?` + querystring.stringify({
+						fields: 'id,email,first_name,last_name',
+						access_token: this.access_token
+					})
+				})
+			}).then(async res => {
+				const { email } = res.data
+				const user = await User.findOne({ emailAddress: email })
+				if (!!user) {
+					const token = await createAuthToken({ user })
+					return response.redirect(`/?${authTokenKey}=${token}`)
+				}
+				return response.redirect(`/?errors_code=facebookLoginFailure`)
+			})
+			
 		},
 		outputSchema: Joi.object({
 			authTokenKey: Joi.string()

@@ -23,7 +23,8 @@ const {
     registerAndLoginRoute,
     loginWithTokenRoute,
     loginWithEmailAndPassword,
-    allAppRoutes
+    allAppRoutes,
+    FACEBOOK_LOGIN_CALLBACK_URI
 }} = require('./constants')
 
 
@@ -69,6 +70,8 @@ const staticPageConfigs = [
       registerAndLoginRoute,
       loginWithTokenRoute,
       loginWithEmailAndPassword,
+      ENCODED_FACEBOOK_LOGIN_URI: config.baseUrl + encodeURI(FACEBOOK_LOGIN_CALLBACK_URI),
+      FACEBOOK_APP_ID: process.env.FB_APP_ID,
       appUrl: config.appRootUrl 
     }
   },

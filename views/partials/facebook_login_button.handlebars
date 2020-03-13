@@ -1,3 +1,6 @@
-<button id="{{button_id}}" type="button" class='centered facebook with-left-icon' onclick='loginToFacebook("{{button_id}}");'>
-    <i class="fab fa-facebook-f fa-lg space-right"></i>Login with Facebook
-</button>
+<a href="https://www.facebook.com/v6.0/dialog/oauth?client_id={{FACEBOOK_APP_ID}}&redirect_uri={{ENCODED_FACEBOOK_LOGIN_URI}}&state=login">
+    <button id="{{button_id}}" type="button" class='centered facebook with-left-icon'>
+        <i class="fab fa-facebook-f fa-lg space-right"></i>Login with Facebook
+    </button>
+</a>
+
