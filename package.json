@@ -31,7 +31,7 @@
     "mongoose": "^5.0.10",
     "nodemon": "^1.17.2",
     "octonode": "^0.9.5",
-    "pm2": "^4.1.2",
+    "pm2": "^5.2.0",
     "uuid": "^3.3.3"
   },
   "devDependencies": {
